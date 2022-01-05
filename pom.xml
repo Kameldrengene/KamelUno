@@ -21,6 +21,11 @@
             <version>17-ea+11</version>
         </dependency>
         <dependency>
+            <groupId>io.github.pspaces.jspace</groupId>
+            <artifactId>common</artifactId>
+            <version>[0.0,)</version>
+        </dependency>
+        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>17-ea+11</version>

@@ -1,8 +1,13 @@
 package com.kamelboyz.kameluno;
 
+import com.kamelboyz.kameluno.Controller.ScreenController;
+import com.kamelboyz.kameluno.KeyPress.OnEscape;
+import com.kamelboyz.kameluno.Model.BootstrapButton;
+import com.kamelboyz.kameluno.ModelView.LobbyView;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -23,6 +28,8 @@ import org.kordamp.bootstrapfx.BootstrapFX;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.kamelboyz.kameluno.Model.BootstrapButton.makeBootstrapButton;
 
 public class MainApp extends Application {
 
@@ -60,11 +67,12 @@ public class MainApp extends Application {
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         RadialGradient lg1 = new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK));
         scene.setFill(lg1);
-        exitOnEsc(scene);
+        OnEscape.exitOnEsc(scene);
         onExitClick(scene);
         initializeSettingsWindow();
         onSettingsClick(scene, stage, root);
         onSettingsButtonExit(scene, stage, root);
+        onPlayClick(scene);
         //Setting title to the Stage
         stage.setTitle("Kamel Ludo");
         stage.setFullScreen(true);
@@ -144,6 +152,18 @@ public class MainApp extends Application {
             }
         });
     }
+    private void onPlayClick(Scene scene) {
+        Button quitButton = buttons.get("PlayButton");
+        quitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                ScreenController screenController = new ScreenController(scene);
+                LobbyView lobbyView = new LobbyView();
+                screenController.addScreen("lobby",lobbyView.getPane());
+                screenController.activate("lobby");
+            }
+        });
+    }
 
     private Text setTextProperties(Text text) {
         text.setFont(new Font(172));
@@ -173,24 +193,8 @@ public class MainApp extends Application {
         }
     }
 
-    private Button makeBootstrapButton(String text, String buttonColor) {
-        Button button = new Button(text);
-        button.getStyleClass().setAll("btn", buttonColor);
-        button.setStyle("-fx-alignment: CENTER;");
-        return button;
-    }
 
-    private void exitOnEsc(Scene scene) {
-        scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode() == KeyCode.ESCAPE) {
-                    Stage sb = (Stage) scene.getWindow();
-                    sb.close();
-                }
-            }
-        });
-    }
+
 
     public static void main(String[] args) {
         launch();

@@ -49,11 +49,13 @@ public class MainView {
 
     }
 
-    public void initializeButtonClicks(Scene scene, Stage stage){
+    public void initializeButtonClicks(){
+        Scene scene = ScreenController.getInstance().getMain();
+        Stage stage = ScreenController.getInstance().getStage();
         onExitClick(scene);
         onSettingsClick(scene, stage, root);
         onSettingsButtonExit(scene, stage, root);
-        onPlayClick(scene);
+        onPlayClick(scene, stage);
     }
 
     private void onSettingsButtonExit(Scene scene, Stage stage, Group root){
@@ -121,13 +123,14 @@ public class MainView {
             }
         });
     }
-    private void onPlayClick(Scene scene) {
+    private void onPlayClick(Scene scene, Stage stage) {
         Button quitButton = buttons.get("PlayButton");
         quitButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
 
                 LobbyView lobbyView = new LobbyView();
+                lobbyView.initializeButtonClicks(scene,stage);
                 ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
                 ScreenController.getInstance().activate("lobby");
             }

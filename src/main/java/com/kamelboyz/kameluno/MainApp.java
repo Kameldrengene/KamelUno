@@ -52,8 +52,9 @@ public class MainApp extends Application {
         stage.setFullScreen(true);
         //Adding scene to the stage
         stage.setScene(scene);
-        mainView.initializeButtonClicks(scene,stage);
-        ScreenController.getInstance().init(scene);
+        ScreenController.getInstance().init(scene,stage);
+        ScreenController.getInstance().addScreen("main",mainView.getRoot());
+        mainView.initializeButtonClicks();
         //Displaying the contents of the stage
         stage.show();
     }

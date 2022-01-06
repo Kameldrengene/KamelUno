@@ -43,19 +43,7 @@ public class MainApp extends Application {
 
         //Setting the text to be added.
         text.setText("Kamel UNO");
-        text.setFont(new Font(172));
-
-        //setting the position of the text
-        text.setTextAlignment(TextAlignment.CENTER);
-        text.setX(bounds.getWidth()/2-text.getLayoutBounds().getWidth()/2);
-        text.setY(bounds.getHeight()/7);
-        text.setFill(Color.rgb(255, 255, 255, 0.7));
-        Reflection reflection = new Reflection();
-        reflection.setTopOffset(-33);
-        reflection.setTopOpacity(0.75);
-        reflection.setBottomOpacity(0.0);
-        reflection.setFraction(0.7);
-        text.setEffect(reflection);
+        text = setTextProperties(text);
         alignButtonsInMiddle();
 
         //Creating a Group object
@@ -67,25 +55,33 @@ public class MainApp extends Application {
         //Creating a scene object
         Scene scene = new Scene(root, bounds.getWidth(), bounds.getHeight());
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
-        RadialGradient lg1 = new RadialGradient(0,
-                .01,
-                bounds.getWidth()/2,
-                bounds.getHeight()/2,
-                bounds.getWidth()/2,
-                false,
-                CycleMethod.NO_CYCLE,
-                new Stop(0, Color.rgb(85, 0, 0, 1)),
-                new Stop(1, Color.BLACK));
+        RadialGradient lg1 = new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK));
         scene.setFill(lg1);
         exitOnEsc(scene);
         //Setting title to the Stage
-        stage.setTitle("Sample Application");
+        stage.setTitle("Kamel Ludo");
         //stage.setFullScreen(true);
         //Adding scene to the stage
         stage.setScene(scene);
 
         //Displaying the contents of the stage
         stage.show();
+    }
+
+    private Text setTextProperties(Text text) {
+        text.setFont(new Font(172));
+
+        text.setTextAlignment(TextAlignment.CENTER);
+        text.setX(bounds.getWidth() / 2 - text.getLayoutBounds().getWidth() / 2);
+        text.setY(bounds.getHeight() / 7);
+        text.setFill(Color.rgb(255, 255, 255, 0.7));
+        Reflection reflection = new Reflection();
+        reflection.setTopOffset(-33);
+        reflection.setTopOpacity(0.75);
+        reflection.setBottomOpacity(0.0);
+        reflection.setFraction(0.7);
+        text.setEffect(reflection);
+        return text;
     }
 
     private void alignButtonsInMiddle() {

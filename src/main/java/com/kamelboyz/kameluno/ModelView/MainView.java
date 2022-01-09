@@ -1,6 +1,7 @@
 package com.kamelboyz.kameluno.ModelView;
 
 import com.kamelboyz.kameluno.Controller.ScreenController;
+import com.kamelboyz.kameluno.Model.HeaderText;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
@@ -38,7 +39,7 @@ public class MainView {
 
         //Setting the text to be added.
         text.setText("Kamel UNO");
-        text = setTextProperties(text);
+        text = HeaderText.setTextProperties(text);
         alignButtonsInMiddle();
 
         root.getChildren().add(text);
@@ -137,21 +138,6 @@ public class MainView {
         });
     }
 
-    private Text setTextProperties(Text text) {
-        text.setFont(new Font(172));
-
-        text.setTextAlignment(TextAlignment.CENTER);
-        text.setX(bounds.getWidth() / 2 - text.getLayoutBounds().getWidth() / 2);
-        text.setY(bounds.getHeight() / 7);
-        text.setFill(Color.rgb(255, 255, 255, 0.7));
-        Reflection reflection = new Reflection();
-        reflection.setTopOffset(-33);
-        reflection.setTopOpacity(0.75);
-        reflection.setBottomOpacity(0.0);
-        reflection.setFraction(0.7);
-        text.setEffect(reflection);
-        return text;
-    }
 
     private void alignButtonsInMiddle() {
         int i = buttons.size();

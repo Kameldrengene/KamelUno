@@ -2,7 +2,7 @@ module com.kamelboyz.kameluno {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
-
+    requires java.sql;
     requires com.dlsc.formsfx;
     requires validatorfx;
     requires org.kordamp.ikonli.javafx;

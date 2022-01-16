@@ -33,7 +33,7 @@ public class Server {
     public void addChatRoom(){
         chatHandler.createChatRoom();
         System.out.println("Starting: "+ (chatHandler.chats.size()-1));
-        chatHandler.chats.get(chatHandler.chats.size()-1).run();
+        new Thread(chatHandler.chats.get(chatHandler.chats.size()-1)).start();
     }
 }
 
@@ -67,20 +67,44 @@ class ChatRoom implements Runnable{
     public int getRoomId() {
         return roomId;
     }
-
     @Override
     public void run() {
+        new Thread(new UserHandler(chatters,chat)).start();
         while (true) {
             try{
                 Object[] t = chat.get(new FormalField(String.class), new FormalField(String.class));
-                System.out.println(t[0] + ":" + t[1]);
+                System.out.println("Chat"+roomId+": "+t[0] + ":" + t[1]);
                 for(String u : chatters){
                     chat.put(u, t[0], t[1]);
                 }
             }catch (InterruptedException e){
 
             }
+        }
+    }
+}
 
+class UserHandler implements Runnable{
+    private ArrayList<String> chatters;
+    private SequentialSpace chat;
+    public UserHandler(ArrayList<String> chatters,SequentialSpace chat){
+        this.chatters=chatters;
+        this.chat=chat;
+    }
+    @Override
+    public void run() {
+        while (true){
+            try {
+                Object[] T = chat.get(new FormalField(String.class));
+                if(!chatters.contains((String)T[0]))
+                {
+                    System.out.println(T[0] + " has joined the chat!");
+                    chat.put("Server", T[0] + " has joined the chat!");
+                    chatters.add((String)T[0]);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ module com.kamelboyz.kameluno {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires lombok;
+    requires common;
 
 
     opens com.kamelboyz.kameluno to javafx.fxml;

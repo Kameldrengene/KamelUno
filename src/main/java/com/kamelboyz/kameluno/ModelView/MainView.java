@@ -130,10 +130,14 @@ public class MainView {
             @Override
             public void handle(ActionEvent actionEvent) {
 
-                LobbyView lobbyView = new LobbyView();
+                /*LobbyView lobbyView = new LobbyView();
                 lobbyView.initializeButtonClicks(scene,stage);
                 ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
-                ScreenController.getInstance().activate("lobby");
+                ScreenController.getInstance().activate("lobby");*/
+
+                GameView gameView = new GameView();
+                ScreenController.getInstance().addScreen("game",gameView.getPane());
+                ScreenController.getInstance().activate("game");
             }
         });
     }

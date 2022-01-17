@@ -18,6 +18,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -127,6 +128,7 @@ public class MainView {
     private void onPlayClick(Scene scene, Stage stage) {
         Button quitButton = buttons.get("PlayButton");
         quitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
 

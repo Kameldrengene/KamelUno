@@ -4,6 +4,7 @@ import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.BootstrapButton;
 import com.kamelboyz.kameluno.Model.Chat;
 import com.kamelboyz.kameluno.Model.HeaderText;
+import com.kamelboyz.kameluno.Model.Player;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -44,8 +45,6 @@ public class LobbyView {
     private Text text = new Text();
 
     public LobbyView() throws IOException {
-        buttons.put("test", BootstrapButton.makeBootstrapButton("Test", "btn-danger"));
-        pane.getChildren().add(buttons.get("test"));
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         pane.setBackground(new Background(bgFill));
         text.setText("Lobby");
@@ -57,14 +56,16 @@ public class LobbyView {
         stage.setScene(scene);
         stage.show();
         try{
-            ChatView chatView = new ChatView("Mark");
+            ChatView chatView = new ChatView(Player.getInstance().getName());
             pane.getChildren().add(chatView.getChatWindow());
+            chatView.getChatWindow().requestFocus();
         } catch (Exception e){
             System.out.println("Could not connect to chat server");
             e.printStackTrace();
         }
 
     }
+
 
     //Should load players from tuple space in a thread
     private void setPlayers() {
@@ -92,19 +93,5 @@ public class LobbyView {
             pane.getChildren().add(entry.getValue());
         }
     }
-
-    public void initializeButtonClicks(Scene scene, Stage stage) {
-        onTestClick();
-    }
-
-    private void onTestClick() {
-        buttons.get("test").setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                ScreenController.getInstance().activate("main");
-            }
-        });
-    }
-
 }
 

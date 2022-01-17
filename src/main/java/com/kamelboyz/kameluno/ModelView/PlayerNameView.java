@@ -58,7 +58,7 @@ public class PlayerNameView {
 
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
-        onEnter(scene, stage);
+        onEnter();
         stage.setScene(scene);
         stage.show();
     }
@@ -67,12 +67,12 @@ public class PlayerNameView {
         return pane;
     }
 
-    private void onEnter(Scene scene, Stage stage){
+    private void onEnter(){
         playerName.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @SneakyThrows
             @Override
             public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode() == KeyCode.ENTER) {
+                if (keyEvent.getCode() == KeyCode.ENTER && playerName.getText().length() > 3) {
                     Player.getInstance().setName(playerName.getText());
                     LobbyView lobbyView = new LobbyView();
                     ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());

@@ -45,7 +45,8 @@ public class ChatView {
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.ENTER) {
-                    chat.sendMessage();
+                    if(inputChat.getText().length() > 0)
+                        chat.sendMessage();
                     chatWindow.requestFocus();
                     inputChat.setText("");
                     enableChat();
@@ -97,7 +98,6 @@ public class ChatView {
         chatMessages.setMaxHeight(bounds.getHeight() / 10);
         chatMessages.setMinHeight(bounds.getHeight() / 10);
         chatMessages.setPrefHeight(bounds.getHeight() / 10);
-        chatMessages.setText("Hej Test \nNew Line???");
         chatWindow.getChildren().add(chatMessages);
         chatWindow.getChildren().add(inputChat);
         new Thread(new ChatUpdater(chatMessages,clientChat)).start();

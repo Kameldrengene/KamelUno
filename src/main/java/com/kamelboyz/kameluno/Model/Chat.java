@@ -15,10 +15,10 @@ public class Chat implements Runnable {
     private RemoteSpace chat;
     private String name;
     private Space clientChat;
-    public Chat(TextField input, Space clientChat) throws IOException {
+    public Chat(TextField input, Space clientChat, String name) throws IOException {
         this.input = input;
         this.chat = new RemoteSpace(uri);
-        this.name = "Mark";
+        this.name = name;
         this.clientChat = clientChat;
     }
 

@@ -24,11 +24,13 @@ public class ChatView {
     private final Pane pane = new Pane();
     private Screen screen = Screen.getPrimary();
     private Rectangle2D bounds = screen.getVisualBounds();
+    private String name;
 
-    public ChatView() throws IOException {
+    public ChatView(String name) throws IOException {
         initializeChatWindow();
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
+        this.name = name;
         pane.getChildren().add(chatWindow);
         stage.setScene(scene);
         stage.show();
@@ -86,7 +88,7 @@ public class ChatView {
     private Space clientChat = new SequentialSpace();
 
     private void initializeChatWindow() throws IOException {
-        chat = new Chat(inputChat, clientChat);
+        chat = new Chat(inputChat, clientChat, name);
         new Thread(chat).start();
         chatWindow = new VBox();
         chatWindow.setLayoutY(bounds.getHeight() - chatWindow.getLayoutBounds().getHeight() - bounds.getHeight() / 10);

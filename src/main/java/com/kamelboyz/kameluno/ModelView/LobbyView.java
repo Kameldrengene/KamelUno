@@ -56,7 +56,7 @@ public class LobbyView {
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
-        ChatView chatView = new ChatView();
+        ChatView chatView = new ChatView("Mark");
         pane.getChildren().add(chatView.getChatWindow());
     }
 

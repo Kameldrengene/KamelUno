@@ -108,16 +108,18 @@ public class LobbyView {
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.ENTER) {
-                    String text = inputChat.getText();
                     chat.sendMessage();
+                    chatWindow.requestFocus();
                     inputChat.setText("");
+                    enableChat();
                 }
             }
         });
-        scene.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+        scene.addEventHandler(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.T) {
+                    keyEvent.consume();
                     enableChat();
                 }
             }

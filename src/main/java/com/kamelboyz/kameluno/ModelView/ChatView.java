@@ -34,6 +34,7 @@ public class ChatView {
         pane.getChildren().add(chatWindow);
         stage.setScene(scene);
         stage.show();
+        chatWindow.requestFocus();
         shortcutChat(scene);
     }
 

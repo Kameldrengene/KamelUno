@@ -56,8 +56,14 @@ public class LobbyView {
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
-        ChatView chatView = new ChatView("Mark");
-        pane.getChildren().add(chatView.getChatWindow());
+        try{
+            ChatView chatView = new ChatView("Mark");
+            pane.getChildren().add(chatView.getChatWindow());
+        } catch (Exception e){
+            System.out.println("Could not connect to chat server");
+            e.printStackTrace();
+        }
+
     }
 
     //Should load players from tuple space in a thread

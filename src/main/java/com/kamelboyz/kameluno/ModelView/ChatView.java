@@ -27,10 +27,10 @@ public class ChatView {
     private String name;
 
     public ChatView(String name) throws IOException {
-        initializeChatWindow();
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
         this.name = name;
+        initializeChatWindow();
         pane.getChildren().add(chatWindow);
         stage.setScene(scene);
         stage.show();
@@ -47,7 +47,6 @@ public class ChatView {
                     chat.sendMessage();
                     chatWindow.requestFocus();
                     inputChat.setText("");
-                    isTyping = false;
                     enableChat();
                 }
             }
@@ -56,9 +55,7 @@ public class ChatView {
             @Override
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.T && !isTyping) {
-                    keyEvent.consume();
                     enableChat();
-                    isTyping = true;
                 }
             }
         });
@@ -69,8 +66,10 @@ public class ChatView {
             inputChat.setEditable(true);
             inputChat.requestFocus();
             showChat = !showChat;
+            isTyping = true;
             return;
         }
+        isTyping = false;
         inputChat.setEditable(false);
         showChat = !showChat;
     }

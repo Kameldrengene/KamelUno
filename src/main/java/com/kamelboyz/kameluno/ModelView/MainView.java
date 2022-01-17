@@ -122,6 +122,7 @@ public class MainView {
             public void handle(ActionEvent actionEvent) {
                 Stage sb = (Stage) scene.getWindow();
                 sb.close();
+                System.exit(0);
             }
         });
     }

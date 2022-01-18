@@ -40,20 +40,18 @@ public class LobbyCard {
     private Map<String, Button> players = new HashMap<>();
     private Text text = new Text();
     private Button joinLobby;
-    private Label leaderName = new Label();
-    private Label gamename = new Label();
-    private Label participants = new Label();
+    private Label lobbyLabel = new Label();
+    private int lobbyId;
 
-    public LobbyCard(String leaderName, String gamename, String participants) throws IOException {
+    public LobbyCard(int lobbyId) throws IOException {
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
+        this.lobbyId = lobbyId;
         joinLobby = BootstrapButton.makeBootstrapButton("Join","btn-info");
         Rectangle lobbyBox = new Rectangle();
         double rWidth = 800;
         double rHeight = 50;
-        this.leaderName.setText(leaderName);
-        this.gamename.setText(gamename);
-        this.participants.setText(participants);
+        this.lobbyLabel.setText(lobbyId+"");
         joinLobby.setLayoutX(700);
         joinLobby.setLayoutY(10);
         lobbyBox.setHeight(rHeight);
@@ -67,28 +65,18 @@ public class LobbyCard {
         onJoinClick();
     }
     private void initializeLabels(){
-        leaderName.setFont(new Font("Arial",24));
-        gamename.setFont(new Font("Arial",24));
-        participants.setFont(new Font("Arial",24));
-        leaderName.setTextFill(Color.rgb(0,0,0,1));
-        gamename.setTextFill(Color.rgb(0,0,0,1));
-        participants.setTextFill(Color.rgb(0,0,0,1));
-        leaderName.setLayoutY(10);
-        leaderName.setLayoutX(10);
-        gamename.setLayoutY(10);
-        gamename.setLayoutX(150);
-        participants.setLayoutY(10);
-        participants.setLayoutX(600);
-        pane.getChildren().add(leaderName);
-        pane.getChildren().add(gamename);
-        pane.getChildren().add(participants);
+        lobbyLabel.setFont(new Font("Arial",24));
+        lobbyLabel.setTextFill(Color.rgb(0,0,0,1));
+        lobbyLabel.setLayoutY(10);
+        lobbyLabel.setLayoutX(50);
+        pane.getChildren().add(lobbyLabel);
     }
     private void onJoinClick(){
         joinLobby.setOnAction(new EventHandler<ActionEvent>() {
             @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
-                LobbyView lobbyView = new LobbyView();
+                LobbyView lobbyView = new LobbyView(lobbyId);
                 ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
                 ScreenController.getInstance().activate("lobby");
             }

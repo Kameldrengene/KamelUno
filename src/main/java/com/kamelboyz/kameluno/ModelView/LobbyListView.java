@@ -64,7 +64,6 @@ public class LobbyListView {
         lobbyLabel.setFont(new Font("Arial",32));
         lobbyLabel.setTextFill(Color.rgb(0,0,0,1));
         HBox hBox = new HBox();
-        new Thread(new LobbyUpdater(this)).start();
         hBox.getChildren().add(lobbyLabel);
         hBox.setSpacing(40);
         hBox.setPadding(new Insets(0, 0, 0, 50));
@@ -81,7 +80,10 @@ public class LobbyListView {
         stage.setScene(scene);
         stage.show();
         createLobby(this);
+        new Thread(new LobbyUpdater(this)).start();
     }
+
+
     private void createLobby(LobbyListView lobbyListView){
         createLobby.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -117,7 +119,7 @@ class LobbyCreator implements Runnable{
     @Override
     public void run() {
         new Thread(new CreateLobby(lobbies)).start();
-
+        new Thread(new LobbyUpdater(lobbyListView)).start();
     }
 }
 
@@ -133,9 +135,14 @@ class LobbyUpdater implements Runnable{
     @SneakyThrows
     @Override
     public void run() {
+        System.out.println("LobbyListHandler start");
         new Thread(new LobbyListHandler(lobbies)).start();
+        Thread.sleep(500);
+        System.out.println("Starting get lobbies");
         while (true){
+            System.out.println("Getting lobby");
             Object[] t = lobbies.get(new FormalField(String.class));
+            System.out.println("Lobby retrived");
             String s = t[0]+"";
             if(s.equals("fin")){
                 lobbyListView.updateVBox(lobbyList);

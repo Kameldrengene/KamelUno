@@ -22,14 +22,15 @@ public class LobbyListHandler implements Runnable {
     @SneakyThrows
     @Override
     public void run() {
-        Object[] resp = lobbyListSpace.get(new FormalField(String.class));
-        String the_resp = (String) resp[0];
+        Object[] resp;
         lobbyListSpace.put("lobby", "getLobbies", "all");
         resp = lobbyListSpace.get(new ActualField("getLobbies"), new FormalField(String[].class));
         String[] list = (String[]) resp[1];
+        System.out.println("Retrieving lobbies");
         for (String s : list) {
             lobbies.put(s);
         }
+        System.out.println("All lobbies retrieved");
         lobbies.put("fin");
     }
 }

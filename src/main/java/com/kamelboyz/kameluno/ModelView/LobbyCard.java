@@ -4,6 +4,7 @@ import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.BootstrapButton;
 import com.kamelboyz.kameluno.Model.HeaderText;
 import com.kamelboyz.kameluno.Model.LobbyJoin;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -29,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.jspace.ActualField;
+import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
 
@@ -85,7 +87,7 @@ public class LobbyCard {
                 LobbyView lobbyView = new LobbyView(lobbyId);
                 ScreenController.getInstance().addScreen("lobby"+lobbyId,lobbyView.getPane());
                 ScreenController.getInstance().activate("lobby"+lobbyId);
-            }
+                }
         });
     }
 }
@@ -99,7 +101,12 @@ class JoinLobby implements Runnable{
     @SneakyThrows
     @Override
     public void run() {
+        System.out.println("Joining lobby!");
         new Thread(new LobbyJoin(space,id)).start();
-        space.get(new ActualField("joined"));
+        System.out.println("Joining lobby thread!");
+        Object[] t = space.get(new FormalField(String.class));
+        String resp = t[0]+"";
+        System.out.println(resp);
+        System.out.println("Joined field!");
     }
 }

@@ -17,6 +17,7 @@ public class OnEscape {
                 if (keyEvent.getCode() == KeyCode.ESCAPE) {
                     Stage sb = (Stage) scene.getWindow();
                     sb.close();
+                    System.exit(0);
                 }
             }
         });

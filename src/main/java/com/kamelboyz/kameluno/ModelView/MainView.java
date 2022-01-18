@@ -18,7 +18,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.Data;
+import lombok.SneakyThrows;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +32,7 @@ public class MainView {
     private Screen screen = Screen.getPrimary();
     private Rectangle2D bounds = screen.getVisualBounds();
     private final Group root = new Group();
-    public MainView(){
+    public MainView() throws IOException {
         Text text = new Text();
         buttons.put("PlayButton", makeBootstrapButton("Play", "btn-success"));
         buttons.put("SettingsButton", makeBootstrapButton("Settings", "btn-info"));
@@ -97,7 +99,6 @@ public class MainView {
         settingsWindow.setLayoutY(bounds.getHeight()/2-rHeight/2);
         settingsWindow.getChildren().add(r);
         settingsWindow.getChildren().add(b);
-
     }
 
     private void toggleSettingsWindow(Scene scene, Stage stage, Group root, ActionEvent actionEvent){
@@ -121,19 +122,20 @@ public class MainView {
             public void handle(ActionEvent actionEvent) {
                 Stage sb = (Stage) scene.getWindow();
                 sb.close();
+                System.exit(0);
             }
         });
     }
     private void onPlayClick(Scene scene, Stage stage) {
         Button quitButton = buttons.get("PlayButton");
         quitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
 
-                /*LobbyView lobbyView = new LobbyView();
-                lobbyView.initializeButtonClicks(scene,stage);
-                ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
-                ScreenController.getInstance().activate("lobby");*/
+                PlayerNameView playerNameView = new PlayerNameView();
+                ScreenController.getInstance().addScreen("playername",playerNameView.getPane());
+                ScreenController.getInstance().activate("playername");
 
                 GameView gameView = new GameView();
                 ScreenController.getInstance().addScreen("game",gameView.getPane());

@@ -3,6 +3,8 @@ package com.kamelboyz.kameluno.ModelView;
 import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.BootstrapButton;
 import com.kamelboyz.kameluno.Model.HeaderText;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -23,6 +25,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -61,6 +64,7 @@ public class LobbyCard {
         initializeLabels();
         stage.setScene(scene);
         stage.show();
+        onJoinClick();
     }
     private void initializeLabels(){
         leaderName.setFont(new Font("Arial",24));
@@ -78,5 +82,16 @@ public class LobbyCard {
         pane.getChildren().add(leaderName);
         pane.getChildren().add(gamename);
         pane.getChildren().add(participants);
+    }
+    private void onJoinClick(){
+        joinLobby.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                LobbyView lobbyView = new LobbyView();
+                ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
+                ScreenController.getInstance().activate("lobby");
+            }
+        });
     }
 }

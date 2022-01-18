@@ -3,6 +3,7 @@ package com.kamelboyz.kameluno;
 import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.KeyPress.OnEscape;
 import com.kamelboyz.kameluno.Model.BootstrapButton;
+import com.kamelboyz.kameluno.Model.LobbyListHandler;
 import com.kamelboyz.kameluno.ModelView.LobbyView;
 import com.kamelboyz.kameluno.ModelView.MainView;
 import javafx.application.Application;

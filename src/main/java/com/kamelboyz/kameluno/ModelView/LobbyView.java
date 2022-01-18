@@ -78,8 +78,8 @@ public class LobbyView {
         players.get("Mark").setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
-                GameView gameView = new GameView();
-                ScreenController.getInstance().addScreen("game",gameView.getPane());
+                GamePlay gamePlay = new GamePlay();
+                ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
                 ScreenController.getInstance().activate("game");
             }
         });

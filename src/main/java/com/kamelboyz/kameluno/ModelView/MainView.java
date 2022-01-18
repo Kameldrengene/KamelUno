@@ -136,6 +136,10 @@ public class MainView {
                 PlayerNameView playerNameView = new PlayerNameView();
                 ScreenController.getInstance().addScreen("playername",playerNameView.getPane());
                 ScreenController.getInstance().activate("playername");
+
+                /*GameView gameView = new GameView();
+                ScreenController.getInstance().addScreen("game",gameView.getPane());
+                ScreenController.getInstance().activate("game");*/
             }
         });
     }

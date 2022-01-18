@@ -3,6 +3,7 @@ package com.kamelboyz.kameluno.ModelView;
 import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.BootstrapButton;
 import com.kamelboyz.kameluno.Model.HeaderText;
+import com.kamelboyz.kameluno.Model.LobbyJoin;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -24,8 +25,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.jspace.ActualField;
+import org.jspace.SequentialSpace;
+import org.jspace.Space;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -76,10 +81,25 @@ public class LobbyCard {
             @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
+                new Thread(new JoinLobby(lobbyId)).start();
                 LobbyView lobbyView = new LobbyView(lobbyId);
-                ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
-                ScreenController.getInstance().activate("lobby");
+                ScreenController.getInstance().addScreen("lobby"+lobbyId,lobbyView.getPane());
+                ScreenController.getInstance().activate("lobby"+lobbyId);
             }
         });
+    }
+}
+
+class JoinLobby implements Runnable{
+    private int id;
+    private Space space = new SequentialSpace();
+    public JoinLobby(int id){
+        this.id = id;
+    }
+    @SneakyThrows
+    @Override
+    public void run() {
+        new Thread(new LobbyJoin(space,id)).start();
+        space.get(new ActualField("joined"));
     }
 }

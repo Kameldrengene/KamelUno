@@ -8,12 +8,12 @@ import org.jspace.Space;
 
 import java.io.IOException;
 
-public class LobbyListHandler implements Runnable {
+public class CreateLobby implements Runnable {
     private String uri = "tcp://127.0.0.1:9001/requestSpace?keep";
     private RemoteSpace lobbyListSpace;
     private Space lobbies;
 
-    public LobbyListHandler(Space lobbies) throws IOException {
+    public CreateLobby(Space lobbies) throws IOException {
         lobbyListSpace = new RemoteSpace(uri);
         this.lobbies = lobbies;
     }
@@ -22,16 +22,9 @@ public class LobbyListHandler implements Runnable {
     @SneakyThrows
     @Override
     public void run() {
+        lobbyListSpace.put("lobby","createLobby","");
         Object[] resp = lobbyListSpace.get(new FormalField(String.class));
         String the_resp = (String) resp[0];
-        lobbyListSpace.put("lobby", "getLobbies", "all");
-        resp = lobbyListSpace.get(new ActualField("getLobbies"), new FormalField(String[].class));
-        String[] list = (String[]) resp[1];
-        for (String s : list) {
-            lobbies.put(s);
-        }
         lobbies.put("fin");
     }
 }
-
-

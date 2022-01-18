@@ -11,13 +11,12 @@ import java.net.UnknownHostException;
 
 public class Chat implements Runnable {
     private TextField input;
-    private String uri = "tcp://127.0.0.1:9001/chat0?keep";
     private RemoteSpace chat;
     private String name;
     private Space clientChat;
-    public Chat(TextField input, Space clientChat, String name) throws IOException {
+    public Chat(TextField input, Space clientChat, String name, int id) throws IOException {
         this.input = input;
-        this.chat = new RemoteSpace(uri);
+        this.chat = new RemoteSpace("tcp://127.0.0.1:9001/lobby" + id + "?keep");
         this.name = name;
         this.clientChat = clientChat;
     }
@@ -25,19 +24,6 @@ public class Chat implements Runnable {
     @Override
     public void run() {
         try {
-
-
-            // Set the URI of the chat space
-            // Default value
-            // Default value
-
-
-
-            // Connect to the remote chat space
-
-
-
-            // Keep sending whatever the user types
             System.out.println("Start chatting...");
             new Thread(new getChatMessages(chat, name, clientChat)).start();
             chat.put(name);

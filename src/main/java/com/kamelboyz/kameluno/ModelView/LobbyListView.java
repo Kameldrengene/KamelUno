@@ -1,11 +1,10 @@
 package com.kamelboyz.kameluno.ModelView;
 
 import com.kamelboyz.kameluno.Controller.ScreenController;
-import com.kamelboyz.kameluno.Model.BootstrapButton;
-import com.kamelboyz.kameluno.Model.HeaderText;
-import com.kamelboyz.kameluno.Model.LobbyListHandler;
-import com.kamelboyz.kameluno.Model.Player;
+import com.kamelboyz.kameluno.Model.*;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -43,6 +42,7 @@ public class LobbyListView {
     private Map<String, Button> players = new HashMap<>();
     private Text text = new Text();
     private VBox vBox = new VBox();
+    private VBox vBoxHeader = new VBox();
     private Button createLobby;
     public LobbyListView() throws IOException {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
@@ -69,17 +69,26 @@ public class LobbyListView {
         hBox.setSpacing(40);
         hBox.setPadding(new Insets(0, 0, 0, 50));
         hBox.getChildren().add(createLobby);
-        vBox.getChildren().add(hBox);
+        vBoxHeader.getChildren().add(hBox);
         vBox.setLayoutY(bounds.getHeight()/3+30);
         vBox.setLayoutX(bounds.getWidth()/2-rWidth/2);
-        pane.getChildren().add(vBox);
+        vBoxHeader.setLayoutY(bounds.getHeight()/3+30);
+        vBoxHeader.setLayoutX(bounds.getWidth()/2-rWidth/2);
+        vBoxHeader.getChildren().add(vBox);
+        pane.getChildren().add(vBoxHeader);
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
+        createLobby(this);
     }
-    private void createLobby(){
-
+    private void createLobby(LobbyListView lobbyListView){
+        createLobby.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                new Thread(new LobbyCreator(lobbyListView)).start();
+            }
+        });
     }
 
     public void updateVBox(ArrayList<String> lobbies) throws IOException {
@@ -87,6 +96,7 @@ public class LobbyListView {
             @SneakyThrows
             @Override
             public void run() {
+                vBox.getChildren().clear();
                 for (String lb : lobbies){
                     vBox.getChildren().add(new LobbyCard(Integer.parseInt(lb)).getPane());
                 }
@@ -95,6 +105,24 @@ public class LobbyListView {
 
     }
 }
+
+class LobbyCreator implements Runnable{
+    private Space lobbies = new SequentialSpace();
+    LobbyListView lobbyListView;
+    public LobbyCreator(LobbyListView lobbyListView){
+        this.lobbyListView = lobbyListView;
+    }
+
+    @SneakyThrows
+    @Override
+    public void run() {
+        new Thread(new CreateLobby(lobbies)).start();
+
+    }
+}
+
+
+
 class LobbyUpdater implements Runnable{
     private Space lobbies = new SequentialSpace();
     private ArrayList<String> lobbyList = new ArrayList<>();

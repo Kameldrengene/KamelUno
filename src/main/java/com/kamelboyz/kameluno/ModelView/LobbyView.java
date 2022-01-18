@@ -59,7 +59,7 @@ public class LobbyView {
         stage.show();
         onLobbyClick();
         try{
-            ChatView chatView = new ChatView(Player.getInstance().getName());
+            ChatView chatView = new ChatView(Player.getInstance().getName(), lobbyId);
             pane.getChildren().add(chatView.getChatWindow());
             chatView.getChatWindow().requestFocus();
         } catch (Exception e){

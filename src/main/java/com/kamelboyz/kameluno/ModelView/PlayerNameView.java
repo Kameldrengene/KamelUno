@@ -74,9 +74,9 @@ public class PlayerNameView {
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.ENTER && playerName.getText().length() > 3) {
                     Player.getInstance().setName(playerName.getText());
-                    LobbyView lobbyView = new LobbyView();
-                    ScreenController.getInstance().addScreen("lobby",lobbyView.getPane());
-                    ScreenController.getInstance().activate("lobby");
+                    LobbyListView lobbyListView = new LobbyListView();
+                    ScreenController.getInstance().addScreen("lobbylist",lobbyListView.getPane());
+                    ScreenController.getInstance().activate("lobbylist");
                 }
             }
         });

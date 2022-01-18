@@ -107,8 +107,11 @@ public class GameView {
         playerCards.add(new Card("Red", "2"));
         playerCards.add(new Card("Blue", "2"));
         playerCards.add(new Card("Green", "2"));
-        playerCards.add(new Card("Yellow", "2"));
-
+        playerCards.add(new Card("Yellow", "3"));
+        playerCards.add(new Card("Blue", "3"));
+        playerCards.add(new Card("Red", "3"));
+        playerCards.add(new Card("Green", "3"));
+        playerCards.add(new Card("Black", "Draw"));
         for (Card card:playerCards) {
             try {
                 String cardName = card.getColor()+"_"+card.getValue();

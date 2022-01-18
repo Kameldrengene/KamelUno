@@ -14,6 +14,7 @@ public class Chat implements Runnable {
     private RemoteSpace chat;
     private String name;
     private Space clientChat;
+
     public Chat(TextField input, Space clientChat, String name, int id) throws IOException {
         this.input = input;
         this.chat = new RemoteSpace("tcp://127.0.0.1:9001/lobby" + id + "?keep");
@@ -23,17 +24,13 @@ public class Chat implements Runnable {
 
     @Override
     public void run() {
-        try {
-            System.out.println("Start chatting...");
-            new Thread(new getChatMessages(chat, name, clientChat)).start();
-            chat.put(name);
+
+        System.out.println("Start chatting...");
+        new Thread(new getChatMessages(chat, name, clientChat)).start();
 
 
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
+
     public void sendMessage() throws InterruptedException {
         String message = input.getText();
         chat.put(name, message);

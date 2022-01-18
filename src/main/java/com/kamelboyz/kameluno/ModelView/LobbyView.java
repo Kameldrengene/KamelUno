@@ -43,11 +43,13 @@ public class LobbyView {
     private Rectangle2D bounds = screen.getVisualBounds();
     private Map<String, Button> players = new HashMap<>();
     private Text text = new Text();
+    private int lobbyId;
 
-    public LobbyView() throws IOException {
+    public LobbyView(int lobbyId) throws IOException {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         pane.setBackground(new Background(bgFill));
         text.setText("Lobby");
+        this.lobbyId = lobbyId;
         text = HeaderText.setTextProperties(text);
         pane.getChildren().add(text);
         setPlayers();
@@ -57,7 +59,7 @@ public class LobbyView {
         stage.show();
         onLobbyClick();
         try{
-            ChatView chatView = new ChatView(Player.getInstance().getName());
+            ChatView chatView = new ChatView(Player.getInstance().getName(), lobbyId);
             pane.getChildren().add(chatView.getChatWindow());
             chatView.getChatWindow().requestFocus();
         } catch (Exception e){

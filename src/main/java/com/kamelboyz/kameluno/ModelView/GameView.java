@@ -1,5 +1,6 @@
 package com.kamelboyz.kameluno.ModelView;
 
+import com.kamelboyz.kameluno.Model.Player;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -41,9 +42,11 @@ public class GameView {
     private VBox opponent1CardsLayout = new VBox(5);
     private HBox opponent2CardsLayout = new HBox(10);
     private VBox opponent3CardsLayout = new VBox(5);
+    private Group deck = new Group();
+    private Group pile = new Group();
 
     public GameView() {
-        pane.setPrefSize(bounds.getWidth(), bounds.getHeight());
+        pane.setPrefSize(bounds.getWidth(), bounds. getHeight()+20);
         calculatePosition();
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         InputStream stream = null;
@@ -56,7 +59,7 @@ public class GameView {
         pane.setBackground(new Background(new BackgroundImage(image,BackgroundRepeat.NO_REPEAT,
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
-                new BackgroundSize(bounds.getWidth(),bounds.getHeight(),false,false,false,false))));
+                new BackgroundSize(bounds.getWidth(),bounds.getHeight()+50,false,false,false,false))));
         initPlayerCards();
         initLayouts();
     }
@@ -68,12 +71,17 @@ public class GameView {
         players.add("talha");
 
         //find your position in array
-        int myIndex = 2;
+        int myIndex = -1;
+        for (int i = 0; i < players.size(); i++) {
+            if(Player.getInstance().getName().equals(players.get(i))){
+                myIndex = i;
+            }
+        }
 
         for (int i = 0; i < players.size() ; i++) {
             int index = (myIndex + i) % players.size();
             String name = players.get(index);
-
+            System.out.println(name);
             // if it's an opponent
             if(i!=0){
                 opponents.put(name,new Opponent(name,i,7));
@@ -128,8 +136,8 @@ public class GameView {
     public BorderPane createLeftBox() throws IOException {
         BorderPane leftBox = new BorderPane();
         leftBox.setPrefWidth(bounds.getWidth() * 0.2);
-        initOpponent3CardsLayout();
-        leftBox.setCenter(opponent3CardsLayout);
+        HBox hBox = initOpponent3CardsLayout();
+        leftBox.setCenter(hBox);
         return leftBox;
     }
 
@@ -137,22 +145,39 @@ public class GameView {
         BorderPane midBox = new BorderPane();
         midBox.setPrefWidth(bounds.getWidth() * 0.6);
 
-        // data of each layout
-        Button button = new Button("click");
-        Button button1 = new Button("click1");
-        Button button2 = new Button("click2");
-        Button button3 = new Button("click3");
-
         // create bottom layout of cards
-        initPlayerCardsLayout();
-        midBox.setBottom(playerCardsLayout);
+        VBox vBoxPlayer = initPlayerCardsLayout();
+        midBox.setBottom(vBoxPlayer);
 
         // create top layout of cards
-        VBox vBox = initOpponent2CardsLayout();
-        midBox.setTop(vBox);
+        VBox vBoxOpponent2 = initOpponent2CardsLayout();
+        midBox.setTop(vBoxOpponent2);
 
         // create middle layout of deck and pile
-        midBox.setCenter(button1);
+        HBox hBox = new HBox(10);
+
+        //deck layout
+        double x = deck.getLayoutX();
+        double y = deck.getLayoutY();
+        System.out.println("X: " +x+ " y: "+y);
+
+        for (int i = 0; i < 4; i++) {
+            ImageView imageView1 = getImage("Deck",Type.HORIZONTAL);
+            imageView1.setX(x+(i*5));
+            imageView1.setY(y+(i*5));
+            deck.getChildren().add(imageView1);
+        }
+
+        // pile layout
+        double xPile = pile.getLayoutX();
+        double yPile = pile.getLayoutY();
+
+
+        hBox.getChildren().add(deck);
+        hBox.setAlignment(Pos.CENTER);
+
+        midBox.setCenter(hBox);
+
 
         return midBox;
     }
@@ -160,19 +185,31 @@ public class GameView {
     public BorderPane createRightBox() throws IOException {
         BorderPane rightBox = new BorderPane();
         rightBox.setPrefWidth(bounds.getWidth() * 0.2);
-        initOpponent1CardsLayout();
-        rightBox.setCenter(opponent1CardsLayout);
+        HBox hBox = initOpponent1CardsLayout();
+        rightBox.setCenter(hBox);
         return rightBox;
     }
 
-    public void initPlayerCardsLayout (){
+    public VBox initPlayerCardsLayout (){
+        VBox vBox = new VBox(10);
         for (String key:playerCardsImages.keySet()) {
             ImageView imageView = playerCardsImages.get(key);
             playerCardsLayout.getChildren().add(imageView);
         }
         playerCardsLayout.setAlignment(Pos.CENTER);
+        Text name = new Text();
+        name.setText(Player.getInstance().getName());
+        //Setting font to the text
+        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 35));
+        name.setFill(Color.DEEPSKYBLUE);
+        name.setX(bounds.getWidth()*0.5);
+        BorderPane borderPane = new BorderPane();
+        borderPane.setCenter(name);
+        vBox.getChildren().addAll(borderPane,playerCardsLayout);
+        return vBox;
     }
-    public void initOpponent3CardsLayout() throws IOException {
+    public HBox initOpponent3CardsLayout() throws IOException {
+        HBox hBox = new HBox(10);
         Opponent opponent = null;
         for (String key: opponents.keySet()) {
             if(opponents.get(key).getPosition()==3){
@@ -183,6 +220,17 @@ public class GameView {
             opponent3CardsLayout.getChildren().add(getImage("Deck_reverse",Type.VERTICAL));
         }
         opponent3CardsLayout.setAlignment(Pos.CENTER_LEFT);
+        Text name = new Text();
+        name.setText(opponent.getName());
+        //Setting font to the text
+        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 35));
+        name.setFill(Color.DEEPSKYBLUE);
+        name.setX(bounds.getWidth()*0.5);
+        name.setRotate(270);
+        BorderPane borderPane = new BorderPane();
+        borderPane.setCenter(name);
+        hBox.getChildren().addAll(opponent3CardsLayout,borderPane);
+        return hBox;
     }
     public VBox initOpponent2CardsLayout() throws IOException {
         VBox vBox = new VBox(10);
@@ -207,7 +255,8 @@ public class GameView {
         vBox.getChildren().addAll(opponent2CardsLayout,borderPane);
         return vBox;
     }
-    public void initOpponent1CardsLayout() throws IOException {
+    public HBox initOpponent1CardsLayout() throws IOException {
+        HBox hBox = new HBox(10);
         Opponent opponent = null;
         for (String key: opponents.keySet()) {
             if(opponents.get(key).getPosition()==1){
@@ -221,6 +270,18 @@ public class GameView {
             opponent1CardsLayout.getChildren().add(getImage("Deck_reverse",Type.VERTICAL));
         }
         opponent1CardsLayout.setAlignment(Pos.CENTER_RIGHT);
+        opponent1CardsLayout.setPadding(new Insets(0,0,0,-20));
+        Text name = new Text();
+        name.setText(opponent.getName());
+        //Setting font to the text
+        name.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 35));
+        name.setFill(Color.DEEPSKYBLUE);
+        name.setX(bounds.getWidth()*0.5);
+        name.setRotate(270);
+        BorderPane borderPane = new BorderPane();
+        borderPane.setCenter(name);
+        hBox.getChildren().addAll(borderPane,opponent1CardsLayout);
+        return hBox;
     }
 
 

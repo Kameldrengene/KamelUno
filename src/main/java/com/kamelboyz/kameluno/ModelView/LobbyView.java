@@ -55,6 +55,7 @@ public class LobbyView {
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
+        onLobbyClick();
         try{
             ChatView chatView = new ChatView(Player.getInstance().getName());
             pane.getChildren().add(chatView.getChatWindow());
@@ -73,6 +74,16 @@ public class LobbyView {
         addPlayerButtons(tempPlayers);
     }
 
+    private void onLobbyClick(){
+        players.get("Mark").setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                GameView gameView = new GameView();
+                ScreenController.getInstance().addScreen("game",gameView.getPane());
+                ScreenController.getInstance().activate("game");
+            }
+        });
+    }
     private void addPlayerButtons(List<String> players) {
         this.players.clear();
         for (String p : players) {

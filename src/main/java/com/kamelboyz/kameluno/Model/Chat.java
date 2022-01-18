@@ -1,5 +1,6 @@
 package com.kamelboyz.kameluno.Model;
 
+import com.kamelboyz.kameluno.Settings.Settings;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import org.jspace.*;
@@ -17,7 +18,7 @@ public class Chat implements Runnable {
 
     public Chat(TextField input, Space clientChat, String name, int id) throws IOException {
         this.input = input;
-        this.chat = new RemoteSpace("tcp://127.0.0.1:9001/lobby" + id + "?keep");
+        this.chat = new RemoteSpace("tcp://"+ Settings.getInstance().getServerIp() +"/lobby" + id + "?keep");
         this.name = name;
         this.clientChat = clientChat;
     }

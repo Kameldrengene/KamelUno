@@ -1,5 +1,6 @@
 package com.kamelboyz.kameluno.Model;
 
+import com.kamelboyz.kameluno.Settings.Settings;
 import lombok.SneakyThrows;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
@@ -9,7 +10,7 @@ import org.jspace.Space;
 import java.io.IOException;
 
 public class CreateLobby implements Runnable {
-    private String uri = "tcp://127.0.0.1:9001/requestSpace?keep";
+    private String uri = "tcp://"+ Settings.getInstance().getServerIp() +"/requestSpace?keep";
     private RemoteSpace lobbyListSpace;
     private Space lobbies;
 

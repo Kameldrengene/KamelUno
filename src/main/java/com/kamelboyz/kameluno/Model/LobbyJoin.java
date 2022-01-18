@@ -1,5 +1,6 @@
 package com.kamelboyz.kameluno.Model;
 
+import com.kamelboyz.kameluno.Settings.Settings;
 import lombok.SneakyThrows;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
@@ -9,7 +10,7 @@ import org.jspace.Space;
 import java.io.IOException;
 
 public class LobbyJoin implements Runnable{
-    private String uri = "tcp://127.0.0.1:9001/requestSpace?keep";
+    private String uri = "tcp://"+ Settings.getInstance().getServerIp() +"/requestSpace?keep";
     private RemoteSpace lobbyListSpace;
     private RemoteSpace lobbySpace;
     private Space localSpace;
@@ -17,7 +18,7 @@ public class LobbyJoin implements Runnable{
 
     public LobbyJoin(Space localSpace, int id) throws IOException {
         lobbyListSpace = new RemoteSpace(uri);
-        lobbySpace = new RemoteSpace("tcp://127.0.0.1:9001/lobby" + id + "?keep");
+        lobbySpace = new RemoteSpace("tcp://"+ Settings.getInstance().getServerIp() +"/lobby" + id + "?keep");
 
         this.localSpace = localSpace;
         this.id = id;

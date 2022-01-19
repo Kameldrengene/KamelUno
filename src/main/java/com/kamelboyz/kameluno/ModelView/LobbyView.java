@@ -1,39 +1,27 @@
 package com.kamelboyz.kameluno.ModelView;
 
 import com.kamelboyz.kameluno.Controller.ScreenController;
-import com.kamelboyz.kameluno.Model.BootstrapButton;
-import com.kamelboyz.kameluno.Model.Chat;
-import com.kamelboyz.kameluno.Model.HeaderText;
-import com.kamelboyz.kameluno.Model.Player;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import com.kamelboyz.kameluno.Model.*;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.*;
-import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
 
 import java.io.IOException;
 import java.util.*;
-
-import static com.kamelboyz.kameluno.Model.BootstrapButton.makeBootstrapButton;
 
 @Data
 public class LobbyView {
@@ -52,12 +40,13 @@ public class LobbyView {
         this.lobbyId = lobbyId;
         text = HeaderText.setTextProperties(text);
         pane.getChildren().add(text);
-        setPlayers();
+//        setPlayers();
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
         onLobbyClick();
+        new Thread(new PlayerUpdater(this)).start();
         try{
             ChatView chatView = new ChatView(Player.getInstance().getName(), lobbyId);
             pane.getChildren().add(chatView.getChatWindow());
@@ -71,27 +60,33 @@ public class LobbyView {
 
 
     //Should load players from tuple space in a thread
-    private void setPlayers() {
-        List<String> tempPlayers = new ArrayList<>(List.of("Mark", "Volkan", "Mikkel", "Talha"));
+    public void setPlayers(List<String> tempPlayers) {
         addPlayerButtons(tempPlayers);
     }
 
     private void onLobbyClick(){
-        players.get("Mark").setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                GameView gameView = new GameView();
-                ScreenController.getInstance().addScreen("game",gameView.getPane());
-                ScreenController.getInstance().activate("game");
-            }
-        });
+//        players.get("Mark").setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent actionEvent) {
+//                GameView gameView = new GameView();
+//                ScreenController.getInstance().addScreen("game",gameView.getPane());
+//                ScreenController.getInstance().activate("game");
+//            }
+//        });
     }
     private void addPlayerButtons(List<String> players) {
         this.players.clear();
         for (String p : players) {
             this.players.put(p, BootstrapButton.makeBootstrapButton(p, "btn-success"));
         }
-        alignPlayers();
+        Platform.setImplicitExit(false);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                alignPlayers();
+            }
+        });
+
     }
 
     private void alignPlayers() {
@@ -108,3 +103,23 @@ public class LobbyView {
     }
 }
 
+class PlayerUpdater implements Runnable{
+    private LobbyView lobbyView;
+    private Space space = new SequentialSpace();
+    public PlayerUpdater(LobbyView lobbyView){
+        this.lobbyView = lobbyView;
+    }
+    @SneakyThrows
+    @Override
+    public void run() {
+        while (true){
+            Thread.sleep(500);
+            LobbyPlayerList lobbyPlayerList = new LobbyPlayerList(space, lobbyView.getLobbyId());
+            lobbyPlayerList.loadPlayers();
+            String temp = space.get(new FormalField(String.class))[0]+"";
+            System.out.println("Players in LobbyView!: " + temp);
+            temp = temp.replaceAll("\\[", "").replaceAll("\\]","");
+            lobbyView.setPlayers(new ArrayList<>(List.of(temp.split("\\s*,\\s*"))));
+        }
+    }
+}

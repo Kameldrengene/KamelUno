@@ -44,10 +44,12 @@ public class LobbyListView {
     private VBox vBox = new VBox();
     private VBox vBoxHeader = new VBox();
     private Button createLobby;
+    private Button refreshButton;
     public LobbyListView() throws IOException {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         pane.setBackground(new Background(bgFill));
         createLobby = BootstrapButton.makeBootstrapButton("Create Lobby", "btn-success");
+        refreshButton = BootstrapButton.makeBootstrapButton("Refresh", "btn-info");
         text.setText("Lobby");
         text = HeaderText.setTextProperties(text);
         pane.getChildren().add(text);
@@ -68,6 +70,7 @@ public class LobbyListView {
         hBox.setSpacing(40);
         hBox.setPadding(new Insets(0, 0, 0, 50));
         hBox.getChildren().add(createLobby);
+        hBox.getChildren().add(refreshButton);
         vBoxHeader.getChildren().add(hBox);
         vBox.setLayoutY(bounds.getHeight()/3+30);
         vBox.setLayoutX(bounds.getWidth()/2-rWidth/2);
@@ -80,6 +83,7 @@ public class LobbyListView {
         stage.setScene(scene);
         stage.show();
         createLobby(this);
+        refreshLobbies(this);
         new Thread(new LobbyUpdater(this)).start();
     }
 
@@ -89,6 +93,16 @@ public class LobbyListView {
             @Override
             public void handle(ActionEvent actionEvent) {
                 new Thread(new LobbyCreator(lobbyListView)).start();
+            }
+        });
+    }
+
+
+    private void refreshLobbies(LobbyListView lobbyListView){
+        refreshButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                new Thread(new LobbyUpdater(lobbyListView)).start();
             }
         });
     }
@@ -127,7 +141,7 @@ class LobbyCreator implements Runnable{
 
 class LobbyUpdater implements Runnable{
     private Space lobbies = new SequentialSpace();
-    private ArrayList<String> lobbyList = new ArrayList<>();
+    private ArrayList<String> lobbyList;
     private LobbyListView lobbyListView;
     public LobbyUpdater(LobbyListView lobbyListView){
         this.lobbyListView = lobbyListView;
@@ -135,6 +149,7 @@ class LobbyUpdater implements Runnable{
     @SneakyThrows
     @Override
     public void run() {
+        lobbyList = new ArrayList<>();
         System.out.println("LobbyListHandler start");
         new Thread(new LobbyListHandler(lobbies)).start();
         Thread.sleep(500);

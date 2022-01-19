@@ -40,7 +40,6 @@ public class LobbyView {
         this.lobbyId = lobbyId;
         text = HeaderText.setTextProperties(text);
         pane.getChildren().add(text);
-//        setPlayers();
         Stage stage = ScreenController.getInstance().getStage();
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);

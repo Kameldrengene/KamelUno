@@ -84,22 +84,20 @@ public class LobbyCard {
             @Override
             public void handle(ActionEvent actionEvent) {
                 new Thread(new JoinLobby(lobbyId, lobbyCard)).start();
-                LobbyView lobbyView = new LobbyView(lobbyId);
-                ScreenController.getInstance().addScreen("lobby"+lobbyId,lobbyView.getPane());
-                ScreenController.getInstance().activate("lobby"+lobbyId);
                 }
         });
     }
     public void loadLobby() throws IOException {
         Platform.setImplicitExit(false);
-        Platform.runLater(new Runnable() {
-            @SneakyThrows
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
+            try {
                 LobbyView lobbyView = new LobbyView(lobbyId);
                 ScreenController.getInstance().addScreen("lobby"+lobbyId,lobbyView.getPane());
                 ScreenController.getInstance().activate("lobby"+lobbyId);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
         });
 
     }
@@ -120,8 +118,9 @@ class JoinLobby implements Runnable{
         System.out.println("Joining lobby thread!");
         Object[] t = space.get(new FormalField(String.class));
         String resp = t[0]+"";
-        System.out.println(resp);
-        if(resp.equals("koybbol")){
+        System.out.println("Join thread response: "+resp);
+        if(resp.equals("full")){
+            System.out.println("Response was: " + resp);
             lobbyCard.getJoinLobby().setDisable(true);
         } else{
             lobbyCard.loadLobby();

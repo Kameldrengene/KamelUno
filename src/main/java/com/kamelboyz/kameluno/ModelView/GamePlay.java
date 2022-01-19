@@ -24,14 +24,17 @@ public class GamePlay {
 
     private GameBoard gameBoard;
 
-    public GamePlay(){
+    private int lobbyId;
+
+    public GamePlay(int lobbyId){
+        this.lobbyId = lobbyId;
         createGameBoard();
     }
 
     private void createGameBoard(){
         calculateOpponentPosition();
         initialCards();
-        gameBoard = new GameBoard(playerCards,opponents);
+        gameBoard = new GameBoard(playerCards,opponents,lobbyId);
     }
     public void calculateOpponentPosition(){
 

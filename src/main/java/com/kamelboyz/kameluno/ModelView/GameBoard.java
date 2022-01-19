@@ -45,10 +45,12 @@ public class GameBoard {
 
     private List<Card> playerCards;
     private Map<String, Opponent> opponents;
+    private int lobbyId;
 
-    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents) {
+    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents,int lobbyId) {
         this.playerCards = playerCards;
         this.opponents = opponents;
+        this.lobbyId = lobbyId;
         setRootLayout();
         initLayouts();
         onDeckClick();
@@ -91,7 +93,9 @@ public class GameBoard {
         BorderPane leftBox = new BorderPane();
         leftBox.setPrefWidth(bounds.getWidth() * 0.2);
         HBox hBox = initOpponent3CardsLayout();
+        ChatView chatView = new ChatView(Player.getInstance().getName(),lobbyId);
         leftBox.setCenter(hBox);
+        leftBox.setBottom(chatView.getChatWindow());
         return leftBox;
     }
 
@@ -100,7 +104,7 @@ public class GameBoard {
         midBox.setPrefWidth(bounds.getWidth() * 0.6);
 
         // create bottom layout of cards
-        VBox vBoxPlayer = initPlayerCardsLayout();
+        VBox vBoxPlayer = initPlayerCardsLayout(midBox);
         midBox.setBottom(vBoxPlayer);
 
         // create top layout of cards
@@ -139,7 +143,7 @@ public class GameBoard {
         return rightBox;
     }
 
-    public VBox initPlayerCardsLayout () throws IOException {
+    public VBox initPlayerCardsLayout (BorderPane borderPaneP) throws IOException {
         VBox vBox = new VBox(10);
         double xPosPlayerCards = playerCardsLayout.getLayoutX();
         int i = 0;
@@ -152,6 +156,15 @@ public class GameBoard {
             imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
                 System.out.println("clicked ");
                 System.out.println(imageView.getUserData());
+                try {
+                    WinView winView = new WinView(bounds.getWidth(),bounds.getHeight());
+                    LoseView loseView = new LoseView("Mike", bounds.getWidth(),bounds.getHeight());
+                    VBox vBox1 = loseView.getVBox();
+                    borderPaneP.getChildren().remove(borderPaneP.getCenter());
+                    borderPaneP.setCenter(vBox1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             });
             playerCardsLayout.getChildren().add(imageView);
             i++;
@@ -178,8 +191,7 @@ public class GameBoard {
                 opponent = opponents.get(key);
             }
         }
-
-       updateOpponentCardLayout(opponent);
+        updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text

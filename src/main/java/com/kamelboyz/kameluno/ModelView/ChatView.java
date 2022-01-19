@@ -121,7 +121,10 @@ class ChatUpdater implements Runnable {
     private void updateChat(String message) {
         messages.add(message);
         Platform.setImplicitExit(false);
-        Platform.runLater(()->chatMessages.appendText(message +"\n"));
+        Platform.runLater(()->{
+            chatMessages.appendText(message +"\n");
+            System.out.println("New message on UI");
+        });
     }
 
     @Override

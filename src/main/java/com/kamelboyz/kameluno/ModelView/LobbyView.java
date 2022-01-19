@@ -64,6 +64,8 @@ public class LobbyView {
         headerBox.getChildren().add(playerBox);
         pane.getChildren().add(headerBox);
         new Thread(new PlayerUpdater(this)).start();
+        System.out.println("WE ARE HERE!");
+        new Thread(new WaitForGame(space,this)).start();
         try{
             ChatView chatView = new ChatView(Player.getInstance().getName(), lobbyId);
             pane.getChildren().add(chatView.getChatWindow());
@@ -80,26 +82,31 @@ public class LobbyView {
     public void setPlayers(List<String> tempPlayers) {
         addPlayerButtons(tempPlayers);
     }
-
+    private boolean gameStarting = false;
     private void onLobbyStartClick(LobbyView lobbyView){
         startButton.setOnAction(new EventHandler<ActionEvent>() {
             @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
-                new Thread(new StartGame(space, lobbyId)).start();
-                new Thread(new GameStarter(lobbyView,space));
+                gameStarting = true;
+                int attempts = 0;
+                while (gameStarting && attempts < 1){
+                    new Thread(new StartGame(space,lobbyView.getLobbyId())).start();
+                    attempts++;
+                }
             }
         });
     }
 
-    public void gotoGame(){
-        inLobby = false;
+    public void loadGame(){
         Platform.runLater(()->{
+            inLobby = false;
             GamePlay gamePlay = new GamePlay(lobbyId);
             ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
             ScreenController.getInstance().activate("game");
         });
     }
+
 
     private void addPlayerButtons(List<String> players) {
         this.players.clear();
@@ -126,21 +133,22 @@ public class LobbyView {
         }
     }
 }
-
-class GameStarter implements Runnable{
+@AllArgsConstructor
+class WaitForGame implements Runnable{
     private Space space;
     private LobbyView lobbyView;
-    public GameStarter(LobbyView lobbyView, Space space){
-        this.space = space;
-        this.lobbyView = lobbyView;
-    }
     @SneakyThrows
     @Override
     public void run() {
+        new Thread(new WaitForGameStart(space, lobbyView.getLobbyId())).start();
         space.get(new ActualField("go!"));
-        lobbyView.gotoGame();
+        lobbyView.setGameStarting(false);
+        System.out.println("Starting game");
+        lobbyView.loadGame();
+        System.out.println("Game started");
     }
 }
+
 
 class PlayerUpdater implements Runnable{
     private LobbyView lobbyView;

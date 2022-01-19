@@ -51,7 +51,7 @@ public class GameBoard {
         this.opponents = opponents;
         setRootLayout();
         initLayouts();
-        updatePileCards();
+        onDeckClick();
     }
 
     public void setRootLayout(){
@@ -172,17 +172,14 @@ public class GameBoard {
     public HBox initOpponent3CardsLayout() throws IOException {
         HBox hBox = new HBox(10);
         Opponent opponent = null;
-        double yPos = opponent3CardsLayout.getLayoutY();
+
         for (String key: opponents.keySet()) {
             if(opponents.get(key).getPosition()==3){
                 opponent = opponents.get(key);
             }
         }
-        for (int i = 0; i < opponent.getNrCards(); i++) {
-            ImageView imageView = getImage("Deck_reverse",Type.VERTICAL);
-            imageView.setY(yPos+(i*60));
-            opponent3CardsLayout.getChildren().add(imageView);
-        }
+
+       updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text
@@ -200,17 +197,12 @@ public class GameBoard {
     public VBox initOpponent2CardsLayout() throws IOException {
         VBox vBox = new VBox(10);
         Opponent opponent = null;
-        double xPos = opponent2CardsLayout.getLayoutX();
         for (String key: opponents.keySet()) {
             if(opponents.get(key).getPosition()==2){
                 opponent = opponents.get(key);
             }
         }
-        for (int i = 0; i < opponent.getNrCards(); i++) {
-            ImageView imageView = getImage("Deck",Type.HORIZONTAL);
-            imageView.setX(xPos+(i*60));
-            opponent2CardsLayout.getChildren().add(imageView);
-        }
+        updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text
@@ -232,14 +224,7 @@ public class GameBoard {
                 opponent = opponents.get(key);
             }
         }
-        double ypos = opponent1CardsLayout.getLayoutY();
-        for (int i = 0; i < opponent.getNrCards(); i++) {
-            //add player cards
-
-            ImageView imageView = getImage("Deck_reverse",Type.VERTICAL);
-            imageView.setY(ypos+(i*60));
-            opponent1CardsLayout.getChildren().add(imageView);
-        }
+        updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text
@@ -294,6 +279,7 @@ public class GameBoard {
         }
     }
 
+
     // update current players cards UI by removing card
     public void removePlayerCard(String cardName){
         int index = -1;
@@ -315,19 +301,48 @@ public class GameBoard {
 
 
 
-    public void updatePileCards(){
+    public void onDeckClick(){
         deck.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @SneakyThrows
             @Override
             public void handle(MouseEvent mouseEvent) {
-
                 // send request to server with jSpace
-                pile.getChildren().add(getImage("Blue_4",Type.HORIZONTAL));
-                addPlayerCard("Green_5");
-                addPlayerCard("Green_6");
-                //removePlayerCard("Green_1");
             }
         });
+    }
+
+
+    public void updatePile(String cardName) throws IOException {
+        pile.getChildren().add(getImage(cardName,Type.HORIZONTAL));
+    }
+
+
+    public void updateOpponentCardLayout(Opponent opponent) throws IOException {
+        if (opponent.getPosition()==1){
+            opponent1CardsLayout.getChildren().clear();
+            double ypos = opponent1CardsLayout.getLayoutY();
+            for (int i = 0; i < opponent.getNrCards(); i++) {
+                ImageView imageView = getImage("Deck_reverse", Type.VERTICAL);
+                imageView.setY(ypos + (i * 60));
+                opponent1CardsLayout.getChildren().add(imageView);
+            }
+        }else if(opponent.getPosition()==2){
+            opponent2CardsLayout.getChildren().clear();
+            double xPos = opponent2CardsLayout.getLayoutX();
+            for (int i = 0; i < opponent.getNrCards(); i++) {
+                ImageView imageView = getImage("Deck",Type.HORIZONTAL);
+                imageView.setX(xPos+(i*60));
+                opponent2CardsLayout.getChildren().add(imageView);
+            }
+        }else {
+            opponent3CardsLayout.getChildren().clear();
+            double yPos = opponent3CardsLayout.getLayoutY();
+            for (int i = 0; i < opponent.getNrCards(); i++) {
+                ImageView imageView = getImage("Deck_reverse",Type.VERTICAL);
+                imageView.setY(yPos+(i*60));
+                opponent3CardsLayout.getChildren().add(imageView);
+            }
+        }
     }
 
 

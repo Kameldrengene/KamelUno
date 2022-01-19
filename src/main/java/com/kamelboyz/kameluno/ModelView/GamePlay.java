@@ -5,6 +5,7 @@ import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
 import lombok.Data;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ public class GamePlay {
 
     private void createGameBoard(){
         calculateOpponentPosition();
-        addPlayerCards();
+        initialCards();
         gameBoard = new GameBoard(playerCards,opponents);
     }
     public void calculateOpponentPosition(){
@@ -61,7 +62,7 @@ public class GamePlay {
 
 
 
-    public void addPlayerCards(){
+    public void initialCards(){
         // temporarily adding cards
         playerCards.add(new Card("Red", "1"));
         playerCards.add(new Card("Blue", "1"));
@@ -76,5 +77,16 @@ public class GamePlay {
         playerCards.add(new Card("Black", "Draw"));
     }
 
+    public void updateBoard() throws IOException {
+        //update top card
+        gameBoard.updatePile("somecard");
+
+        // update opponent cards
+        for (String key:opponents.keySet()) {
+            Opponent opponent = opponents.get(key);
+            gameBoard.updateOpponentCardLayout(opponent);
+        }
+
+    }
 }
 

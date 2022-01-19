@@ -122,6 +122,7 @@ class JoinLobby implements Runnable{
         if(resp.equals("full")){
             System.out.println("Response was: " + resp);
             lobbyCard.getJoinLobby().setDisable(true);
+            Platform.runLater(()->lobbyCard.getJoinLobby().setText("Full"));
         } else{
             lobbyCard.loadLobby();
         }

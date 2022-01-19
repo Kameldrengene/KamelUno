@@ -41,6 +41,8 @@ public class LobbyView {
     private Button startButton;
     private boolean inLobby;
     private Space space = new SequentialSpace();
+    private ChatView chatView;
+
 
     public LobbyView(int lobbyId) throws IOException {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
@@ -67,7 +69,7 @@ public class LobbyView {
         System.out.println("WE ARE HERE!");
         new Thread(new WaitForGame(space,this)).start();
         try{
-            ChatView chatView = new ChatView(Player.getInstance().getName(), lobbyId);
+            chatView = new ChatView(Player.getInstance().getName(), lobbyId);
             pane.getChildren().add(chatView.getChatWindow());
             chatView.getChatWindow().requestFocus();
         } catch (Exception e){
@@ -101,7 +103,7 @@ public class LobbyView {
     public void loadGame(){
         Platform.runLater(()->{
             inLobby = false;
-            GamePlay gamePlay = new GamePlay(lobbyId);
+            GamePlay gamePlay = new GamePlay(lobbyId, chatView);
             ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
             ScreenController.getInstance().activate("game");
         });

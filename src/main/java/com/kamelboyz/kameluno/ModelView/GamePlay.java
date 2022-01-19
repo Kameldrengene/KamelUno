@@ -1,6 +1,7 @@
 package com.kamelboyz.kameluno.ModelView;
 
 import com.kamelboyz.kameluno.Model.Card;
+import com.kamelboyz.kameluno.Model.Chat;
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
 import lombok.Data;
@@ -23,18 +24,18 @@ public class GamePlay {
     private List<Card> playerCards = new ArrayList<>();
 
     private GameBoard gameBoard;
-
+    private ChatView chatView;
     private int lobbyId;
-
-    public GamePlay(int lobbyId){
+    public GamePlay(int lobbyId, ChatView chatView){
         this.lobbyId = lobbyId;
+        this.chatView = chatView;
         createGameBoard();
     }
 
     private void createGameBoard(){
         calculateOpponentPosition();
         initialCards();
-        gameBoard = new GameBoard(playerCards,opponents,lobbyId);
+        gameBoard = new GameBoard(playerCards,opponents,lobbyId, chatView);
     }
     public void calculateOpponentPosition(){
 

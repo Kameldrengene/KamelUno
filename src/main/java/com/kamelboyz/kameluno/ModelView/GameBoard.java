@@ -46,11 +46,13 @@ public class GameBoard {
     private List<Card> playerCards;
     private Map<String, Opponent> opponents;
     private int lobbyId;
+    private ChatView chatView;
 
-    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents,int lobbyId) {
+    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents,int lobbyId, ChatView chatView) {
         this.playerCards = playerCards;
         this.opponents = opponents;
         this.lobbyId = lobbyId;
+        this.chatView = chatView;
         setRootLayout();
         initLayouts();
         onDeckClick();
@@ -93,7 +95,6 @@ public class GameBoard {
         BorderPane leftBox = new BorderPane();
         leftBox.setPrefWidth(bounds.getWidth() * 0.2);
         HBox hBox = initOpponent3CardsLayout();
-        ChatView chatView = new ChatView(Player.getInstance().getName(),lobbyId);
         leftBox.setCenter(hBox);
         leftBox.setBottom(chatView.getChatWindow());
         return leftBox;

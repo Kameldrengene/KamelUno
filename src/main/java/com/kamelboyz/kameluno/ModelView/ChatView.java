@@ -2,6 +2,7 @@ package com.kamelboyz.kameluno.ModelView;
 
 import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.Chat;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -96,6 +97,7 @@ public class ChatView {
         chatWindow = new VBox();
         chatWindow.setLayoutY(bounds.getHeight() - chatWindow.getLayoutBounds().getHeight() - bounds.getHeight() / 10);
         chatMessages.setEditable(false);
+        chatMessages.setText("");
         inputChat.setEditable(true);
         chatMessages.setMaxHeight(bounds.getHeight() / 10);
         chatMessages.setMinHeight(bounds.getHeight() / 10);
@@ -118,17 +120,8 @@ class ChatUpdater implements Runnable {
 
     private void updateChat(String message) {
         messages.add(message);
-        String finalMessage = "";
-        if(messages.size() < 8){
-            for(int i = 0; i < messages.size();i++){
-                finalMessage += messages.get(i)+"\n";
-            }
-        } else{
-            for(int i = messages.size()-8; i < messages.size(); i++){
-                finalMessage += messages.get(i)+"\n";
-            }
-        }
-        chatMessages.setText(finalMessage);
+        Platform.setImplicitExit(false);
+        Platform.runLater(()->chatMessages.appendText(message +"\n"));
     }
 
     @Override
@@ -138,7 +131,6 @@ class ChatUpdater implements Runnable {
                 System.out.println("Waiting for new msg");
                 Object[] t = clientChat.get(new FormalField(String.class));
                 updateChat(t[0]+"");
-                System.out.println(t[0]+"");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

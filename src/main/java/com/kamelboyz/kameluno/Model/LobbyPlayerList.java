@@ -26,7 +26,7 @@ public class LobbyPlayerList {
         lobbySpace.put("getPlayers", "");
         Object[] t = lobbySpace.get(new FormalField(String.class));
         localSpace.put(t[0]);
-        System.out.println("Players: " + t[0]);
+//        System.out.println("Players: " + t[0]);
 
     }
 

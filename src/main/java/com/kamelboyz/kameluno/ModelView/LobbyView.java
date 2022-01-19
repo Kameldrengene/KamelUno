@@ -3,7 +3,10 @@ package com.kamelboyz.kameluno.ModelView;
 import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.*;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -32,10 +35,14 @@ public class LobbyView {
     private Map<String, Button> players = new HashMap<>();
     private Text text = new Text();
     private int lobbyId;
+    private VBox playerBox = new VBox();
+    private VBox headerBox = new VBox();
+    private Button startButton;
 
     public LobbyView(int lobbyId) throws IOException {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         pane.setBackground(new Background(bgFill));
+        startButton = BootstrapButton.makeBootstrapButton("Start", "btn-info");
         text.setText("Lobby");
         this.lobbyId = lobbyId;
         text = HeaderText.setTextProperties(text);
@@ -44,7 +51,14 @@ public class LobbyView {
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
-        onLobbyClick();
+        onLobbyStartClick();
+        headerBox.setLayoutX(bounds.getWidth()/4);
+        headerBox.setLayoutY(bounds.getHeight()/3);
+        headerBox.setSpacing(10);
+        playerBox.setSpacing(10);
+        headerBox.getChildren().add(startButton);
+        headerBox.getChildren().add(playerBox);
+        pane.getChildren().add(headerBox);
         new Thread(new PlayerUpdater(this)).start();
         try{
             ChatView chatView = new ChatView(Player.getInstance().getName(), lobbyId);
@@ -63,15 +77,15 @@ public class LobbyView {
         addPlayerButtons(tempPlayers);
     }
 
-    private void onLobbyClick(){
-//        players.get("Mark").setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent actionEvent) {
-//                GameView gameView = new GameView();
-//                ScreenController.getInstance().addScreen("game",gameView.getPane());
-//                ScreenController.getInstance().activate("game");
-//            }
-//        });
+    private void onLobbyStartClick(){
+        startButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                GameView gameView = new GameView();
+                ScreenController.getInstance().addScreen("game",gameView.getPane());
+                ScreenController.getInstance().activate("game");
+            }
+        });
     }
     private void addPlayerButtons(List<String> players) {
         this.players.clear();
@@ -89,15 +103,12 @@ public class LobbyView {
     }
 
     private void alignPlayers() {
-        int i = 0;
+        playerBox.getChildren().clear();
         for (var entry : players.entrySet()) {
             entry.getValue().setMaxSize(bounds.getWidth(), bounds.getHeight() / 20);
             entry.getValue().setMinSize(bounds.getWidth() / 2, bounds.getHeight() / 20);
             entry.getValue().setPrefWidth(bounds.getWidth() / 2);
-            entry.getValue().setLayoutY(((bounds.getHeight() / (20)) + (i * 80)) + bounds.getHeight() / 2);
-            entry.getValue().setLayoutX((bounds.getWidth() / 4));
-            i--;
-            pane.getChildren().add(entry.getValue());
+            playerBox.getChildren().add(entry.getValue());
         }
     }
 }
@@ -111,14 +122,15 @@ class PlayerUpdater implements Runnable{
     @SneakyThrows
     @Override
     public void run() {
+        Thread.sleep(500);
+        LobbyPlayerList lobbyPlayerList = new LobbyPlayerList(space, lobbyView.getLobbyId());
         while (true){
-            Thread.sleep(500);
-            LobbyPlayerList lobbyPlayerList = new LobbyPlayerList(space, lobbyView.getLobbyId());
             lobbyPlayerList.loadPlayers();
             String temp = space.get(new FormalField(String.class))[0]+"";
-            System.out.println("Players in LobbyView!: " + temp);
+//            System.out.println("Players in LobbyView!: " + temp);
             temp = temp.replaceAll("\\[", "").replaceAll("\\]","");
             lobbyView.setPlayers(new ArrayList<>(List.of(temp.split("\\s*,\\s*"))));
+            Thread.sleep(5000);
         }
     }
 }

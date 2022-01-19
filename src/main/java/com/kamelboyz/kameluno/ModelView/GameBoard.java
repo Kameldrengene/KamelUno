@@ -1,6 +1,9 @@
 package com.kamelboyz.kameluno.ModelView;
 
+import com.kamelboyz.kameluno.Model.Card;
+import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -8,6 +11,8 @@ import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
@@ -17,38 +22,42 @@ import javafx.scene.text.*;
 import javafx.stage.Screen;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.SneakyThrows;
 
 import java.io.*;
 import java.util.*;
 
 @Data
-public class GameView {
+public class GameBoard {
 
-    // temp list to correctly place players
-    private List<String> players = new ArrayList<>();
-
-    // count each opponents' cards and position
-    private Map<String, Opponent> opponents = new HashMap<>();
-
-    private List<Card> playerCards = new ArrayList<>();
-    private final GridPane grid = new GridPane();
     private final Pane pane = new Pane();
     private Screen screen = Screen.getPrimary();
     private Rectangle2D bounds = screen.getVisualBounds();
-    private List<ImageView> pileImages = new ArrayList<>();
-    private Map<String,ImageView> playerCardsImages = new HashMap<>();
 
-    private HBox playerCardsLayout = new HBox(10);
-    private VBox opponent1CardsLayout = new VBox(5);
-    private HBox opponent2CardsLayout = new HBox(10);
-    private VBox opponent3CardsLayout = new VBox(5);
+
+    private Group playerCardsLayout = new Group();
+    private Group opponent1CardsLayout = new Group();
+    private Group opponent2CardsLayout = new Group();
+    private Group opponent3CardsLayout = new Group();
     private Group deck = new Group();
-    private Group pile = new Group();
+    private StackPane pile = new StackPane();
 
-    public GameView() {
+
+    private List<Card> playerCards;
+    private Map<String, Opponent> opponents;
+    private int lobbyId;
+
+    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents,int lobbyId) {
+        this.playerCards = playerCards;
+        this.opponents = opponents;
+        this.lobbyId = lobbyId;
+        setRootLayout();
+        initLayouts();
+        onDeckClick();
+    }
+
+    public void setRootLayout(){
         pane.setPrefSize(bounds.getWidth(), bounds. getHeight()+20);
-        calculatePosition();
-        BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         InputStream stream = null;
         try {
             stream = getClass().getResource("/images/Table_1.png").openStream();
@@ -60,33 +69,6 @@ public class GameView {
                 BackgroundRepeat.NO_REPEAT,
                 BackgroundPosition.DEFAULT,
                 new BackgroundSize(bounds.getWidth(),bounds.getHeight()+50,false,false,false,false))));
-        initPlayerCards();
-        initLayouts();
-    }
-
-    public void calculatePosition(){
-        players.add("mike");
-        players.add("volkan");
-        players.add("mark");
-        players.add("talha");
-
-        //find your position in array
-        int myIndex = -1;
-        for (int i = 0; i < players.size(); i++) {
-            if(Player.getInstance().getName().equals(players.get(i))){
-                myIndex = i;
-            }
-        }
-
-        for (int i = 0; i < players.size() ; i++) {
-            int index = (myIndex + i) % players.size();
-            String name = players.get(index);
-            System.out.println(name);
-            // if it's an opponent
-            if(i!=0){
-                opponents.put(name,new Opponent(name,i,7));
-            }
-        }
     }
 
     public void initLayouts() {
@@ -106,38 +88,14 @@ public class GameView {
 
     }
 
-    public void initPlayerCards() {
-
-        // temp cards
-        playerCards.add(new Card("Red", "1"));
-        playerCards.add(new Card("Blue", "1"));
-        playerCards.add(new Card("Green", "1"));
-        playerCards.add(new Card("Red", "2"));
-        playerCards.add(new Card("Blue", "2"));
-        playerCards.add(new Card("Green", "2"));
-        playerCards.add(new Card("Yellow", "3"));
-        playerCards.add(new Card("Blue", "3"));
-        playerCards.add(new Card("Red", "3"));
-        playerCards.add(new Card("Green", "3"));
-        playerCards.add(new Card("Black", "Draw"));
-        for (Card card:playerCards) {
-            try {
-                String cardName = card.getColor()+"_"+card.getValue();
-                ImageView imageView = getImage(cardName,Type.HORIZONTAL);
-                playerCardsImages.put(cardName,imageView);
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-        }
-
-    }
-
 
     public BorderPane createLeftBox() throws IOException {
         BorderPane leftBox = new BorderPane();
         leftBox.setPrefWidth(bounds.getWidth() * 0.2);
         HBox hBox = initOpponent3CardsLayout();
+        ChatView chatView = new ChatView(Player.getInstance().getName(),lobbyId);
         leftBox.setCenter(hBox);
+        leftBox.setBottom(chatView.getChatWindow());
         return leftBox;
     }
 
@@ -146,7 +104,7 @@ public class GameView {
         midBox.setPrefWidth(bounds.getWidth() * 0.6);
 
         // create bottom layout of cards
-        VBox vBoxPlayer = initPlayerCardsLayout();
+        VBox vBoxPlayer = initPlayerCardsLayout(midBox);
         midBox.setBottom(vBoxPlayer);
 
         // create top layout of cards
@@ -154,7 +112,7 @@ public class GameView {
         midBox.setTop(vBoxOpponent2);
 
         // create middle layout of deck and pile
-        HBox hBox = new HBox(10);
+        HBox hBox = new HBox(30);
 
         //deck layout
         double x = deck.getLayoutX();
@@ -168,12 +126,7 @@ public class GameView {
             deck.getChildren().add(imageView1);
         }
 
-        // pile layout
-        double xPile = pile.getLayoutX();
-        double yPile = pile.getLayoutY();
-
-
-        hBox.getChildren().add(deck);
+        hBox.getChildren().addAll(pile,deck);
         hBox.setAlignment(Pos.CENTER);
 
         midBox.setCenter(hBox);
@@ -190,13 +143,32 @@ public class GameView {
         return rightBox;
     }
 
-    public VBox initPlayerCardsLayout (){
+    public VBox initPlayerCardsLayout (BorderPane borderPaneP) throws IOException {
         VBox vBox = new VBox(10);
-        for (String key:playerCardsImages.keySet()) {
-            ImageView imageView = playerCardsImages.get(key);
+        double xPosPlayerCards = playerCardsLayout.getLayoutX();
+        int i = 0;
+
+        for (Card card:playerCards) {
+            String cardName = card.getColor()+"_"+card.getValue();
+            ImageView imageView = getImage(cardName,Type.HORIZONTAL);
+            imageView.setX(xPosPlayerCards+(i*60));
+            imageView.setUserData(cardName);
+            imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
+                System.out.println("clicked ");
+                System.out.println(imageView.getUserData());
+                try {
+                    WinView winView = new WinView(bounds.getWidth(),bounds.getHeight());
+                    LoseView loseView = new LoseView("Mike", bounds.getWidth(),bounds.getHeight());
+                    VBox vBox1 = loseView.getVBox();
+                    borderPaneP.getChildren().remove(borderPaneP.getCenter());
+                    borderPaneP.setCenter(vBox1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             playerCardsLayout.getChildren().add(imageView);
+            i++;
         }
-        playerCardsLayout.setAlignment(Pos.CENTER);
         Text name = new Text();
         name.setText(Player.getInstance().getName());
         //Setting font to the text
@@ -205,21 +177,21 @@ public class GameView {
         name.setX(bounds.getWidth()*0.5);
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(name);
-        vBox.getChildren().addAll(borderPane,playerCardsLayout);
+        BorderPane cardsBorder = new BorderPane();
+        cardsBorder.setCenter(playerCardsLayout);
+        vBox.getChildren().addAll(borderPane,cardsBorder);
         return vBox;
     }
     public HBox initOpponent3CardsLayout() throws IOException {
         HBox hBox = new HBox(10);
         Opponent opponent = null;
+
         for (String key: opponents.keySet()) {
             if(opponents.get(key).getPosition()==3){
                 opponent = opponents.get(key);
             }
         }
-        for (int i = 0; i < opponent.getNrCards(); i++) {
-            opponent3CardsLayout.getChildren().add(getImage("Deck_reverse",Type.VERTICAL));
-        }
-        opponent3CardsLayout.setAlignment(Pos.CENTER_LEFT);
+        updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text
@@ -229,7 +201,9 @@ public class GameView {
         name.setRotate(270);
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(name);
-        hBox.getChildren().addAll(opponent3CardsLayout,borderPane);
+        BorderPane borderCards = new BorderPane();
+        borderCards.setCenter(opponent3CardsLayout);
+        hBox.getChildren().addAll(borderCards,borderPane);
         return hBox;
     }
     public VBox initOpponent2CardsLayout() throws IOException {
@@ -240,10 +214,7 @@ public class GameView {
                 opponent = opponents.get(key);
             }
         }
-        for (int i = 0; i < opponent.getNrCards(); i++) {
-            opponent2CardsLayout.getChildren().add(getImage("Deck",Type.HORIZONTAL));
-        }
-        opponent2CardsLayout.setAlignment(Pos.TOP_CENTER);
+        updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text
@@ -252,7 +223,9 @@ public class GameView {
         name.setX(bounds.getWidth()*0.5);
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(name);
-        vBox.getChildren().addAll(opponent2CardsLayout,borderPane);
+        BorderPane borderCards = new BorderPane();
+        borderCards.setCenter(opponent2CardsLayout);
+        vBox.getChildren().addAll(borderCards,borderPane);
         return vBox;
     }
     public HBox initOpponent1CardsLayout() throws IOException {
@@ -263,14 +236,7 @@ public class GameView {
                 opponent = opponents.get(key);
             }
         }
-        for (int i = 0; i < opponent.getNrCards(); i++) {
-            //add player name
-
-            //add player cards
-            opponent1CardsLayout.getChildren().add(getImage("Deck_reverse",Type.VERTICAL));
-        }
-        opponent1CardsLayout.setAlignment(Pos.CENTER_RIGHT);
-        opponent1CardsLayout.setPadding(new Insets(0,0,0,-20));
+        updateOpponentCardLayout(opponent);
         Text name = new Text();
         name.setText(opponent.getName());
         //Setting font to the text
@@ -281,6 +247,7 @@ public class GameView {
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(name);
         hBox.getChildren().addAll(borderPane,opponent1CardsLayout);
+        hBox.setAlignment(Pos.CENTER_RIGHT);
         return hBox;
     }
 
@@ -304,18 +271,95 @@ public class GameView {
         return imageView;
     }
 
-    public void updatePlayerCards() {
-
+    // update current players cards UI by adding card
+    public void addPlayerCard(String cardName) throws IOException {
+        double xPosPlayerCards = playerCardsLayout.getLayoutX();
+        System.out.println("layout pos "+xPosPlayerCards);
+        ImageView imageView = getImage(cardName,Type.HORIZONTAL);
+        //imageView.setX(xPosPlayerCards+((playerCardsLayout.getChildren().size()-2)*60));
+        imageView.setUserData(cardName);
+        imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
+            // send to server
+            // if response is success
+            System.out.println("played "+imageView.getUserData());
+        });
+        playerCardsLayout.getChildren().add(imageView);
+        double xpos = playerCardsLayout.getLayoutX();
+        for (int i = 0; i < playerCardsLayout.getChildren().size(); i++) {
+            ImageView imageView1 = (ImageView) playerCardsLayout.getChildren().get(i);
+            imageView1.setX(xpos+(i*60));
+        }
     }
 
 
-}
+    // update current players cards UI by removing card
+    public void removePlayerCard(String cardName){
+        int index = -1;
+        for (int i = 0; i < playerCardsLayout.getChildren().size(); i++) {
+            if(cardName.equals(playerCardsLayout.getChildren().get(i).getUserData())){
+                System.out.println("founded "+ cardName);
+                index = i;
+            }
+        }
+        if(index!=-1){
+            playerCardsLayout.getChildren().remove(index);
+            double xpos = playerCardsLayout.getLayoutX();
+            for (int i = 0; i < playerCardsLayout.getChildren().size(); i++) {
+                ImageView imageView = (ImageView) playerCardsLayout.getChildren().get(i);
+                imageView.setX(xpos+(i*60));
+            }
+        }
+    }
 
-@Data
-@AllArgsConstructor
-class Card{
-    private String color;
-    private String value;
+
+
+    public void onDeckClick(){
+        deck.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                // send request to server with jSpace
+            }
+        });
+    }
+
+
+    public void updatePile(String cardName) throws IOException {
+        pile.getChildren().add(getImage(cardName,Type.HORIZONTAL));
+    }
+
+
+    public void updateOpponentCardLayout(Opponent opponent) throws IOException {
+        if (opponent.getPosition()==1){
+            opponent1CardsLayout.getChildren().clear();
+            double ypos = opponent1CardsLayout.getLayoutY();
+            for (int i = 0; i < opponent.getNrCards(); i++) {
+                ImageView imageView = getImage("Deck_reverse", Type.VERTICAL);
+                imageView.setY(ypos + (i * 60));
+                opponent1CardsLayout.getChildren().add(imageView);
+            }
+        }else if(opponent.getPosition()==2){
+            opponent2CardsLayout.getChildren().clear();
+            double xPos = opponent2CardsLayout.getLayoutX();
+            for (int i = 0; i < opponent.getNrCards(); i++) {
+                ImageView imageView = getImage("Deck",Type.HORIZONTAL);
+                imageView.setX(xPos+(i*60));
+                opponent2CardsLayout.getChildren().add(imageView);
+            }
+        }else {
+            opponent3CardsLayout.getChildren().clear();
+            double yPos = opponent3CardsLayout.getLayoutY();
+            for (int i = 0; i < opponent.getNrCards(); i++) {
+                ImageView imageView = getImage("Deck_reverse",Type.VERTICAL);
+                imageView.setY(yPos+(i*60));
+                opponent3CardsLayout.getChildren().add(imageView);
+            }
+        }
+    }
+
+
+
+
 }
 
 enum Type{
@@ -323,10 +367,3 @@ enum Type{
     HORIZONTAL
 }
 
-@Data
-@AllArgsConstructor
-class Opponent{
-    private String name;
-    private int position;
-    private int nrCards;
-}

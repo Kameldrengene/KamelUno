@@ -19,6 +19,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.*;
+import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
 import org.jspace.Space;
@@ -38,10 +39,13 @@ public class LobbyView {
     private VBox playerBox = new VBox();
     private VBox headerBox = new VBox();
     private Button startButton;
+    private boolean inLobby;
+    private Space space = new SequentialSpace();
 
     public LobbyView(int lobbyId) throws IOException {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         pane.setBackground(new Background(bgFill));
+        inLobby = true;
         startButton = BootstrapButton.makeBootstrapButton("Start", "btn-info");
         text.setText("Lobby");
         this.lobbyId = lobbyId;
@@ -51,7 +55,7 @@ public class LobbyView {
         Scene scene = ScreenController.getInstance().getMain();
         stage.setScene(scene);
         stage.show();
-        onLobbyStartClick();
+        onLobbyStartClick(this);
         headerBox.setLayoutX(bounds.getWidth()/4);
         headerBox.setLayoutY(bounds.getHeight()/3);
         headerBox.setSpacing(10);
@@ -77,16 +81,26 @@ public class LobbyView {
         addPlayerButtons(tempPlayers);
     }
 
-    private void onLobbyStartClick(){
+    private void onLobbyStartClick(LobbyView lobbyView){
         startButton.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
-                GamePlay gamePlay = new GamePlay(lobbyId);
-                ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
-                ScreenController.getInstance().activate("game");
+                new Thread(new StartGame(space, lobbyId)).start();
+                new Thread(new GameStarter(lobbyView,space));
             }
         });
     }
+
+    public void gotoGame(){
+        inLobby = false;
+        Platform.runLater(()->{
+            GamePlay gamePlay = new GamePlay(lobbyId);
+            ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
+            ScreenController.getInstance().activate("game");
+        });
+    }
+
     private void addPlayerButtons(List<String> players) {
         this.players.clear();
         for (String p : players) {
@@ -113,6 +127,21 @@ public class LobbyView {
     }
 }
 
+class GameStarter implements Runnable{
+    private Space space;
+    private LobbyView lobbyView;
+    public GameStarter(LobbyView lobbyView, Space space){
+        this.space = space;
+        this.lobbyView = lobbyView;
+    }
+    @SneakyThrows
+    @Override
+    public void run() {
+        space.get(new ActualField("go!"));
+        lobbyView.gotoGame();
+    }
+}
+
 class PlayerUpdater implements Runnable{
     private LobbyView lobbyView;
     private Space space = new SequentialSpace();
@@ -124,8 +153,9 @@ class PlayerUpdater implements Runnable{
     public void run() {
         Thread.sleep(500);
         LobbyPlayerList lobbyPlayerList = new LobbyPlayerList(space, lobbyView.getLobbyId());
-        while (true){
+        while (lobbyView.isInLobby()){
             lobbyPlayerList.loadPlayers();
+            System.out.println(lobbyView.isInLobby());
             String temp = space.get(new FormalField(String.class))[0]+"";
 //            System.out.println("Players in LobbyView!: " + temp);
             temp = temp.replaceAll("\\[", "").replaceAll("\\]","");

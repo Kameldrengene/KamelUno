@@ -103,9 +103,14 @@ public class LobbyView {
     public void loadGame(){
         Platform.runLater(()->{
             inLobby = false;
-            GamePlay gamePlay = new GamePlay(lobbyId, chatView);
-            ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
-            ScreenController.getInstance().activate("game");
+            try{
+                GamePlay gamePlay = new GamePlay(lobbyId, chatView);
+                ScreenController.getInstance().addScreen("game",gamePlay.getGameBoard().getPane());
+                ScreenController.getInstance().activate("game");
+            }catch (IOException | InterruptedException e){
+                e.printStackTrace();
+            }
+
         });
     }
 

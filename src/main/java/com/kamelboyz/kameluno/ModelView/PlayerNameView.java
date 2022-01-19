@@ -72,7 +72,7 @@ public class PlayerNameView {
             @SneakyThrows
             @Override
             public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode() == KeyCode.ENTER && playerName.getText().length() > 3) {
+                if (keyEvent.getCode() == KeyCode.ENTER && playerName.getText().length() >= 1) {
                     Player.getInstance().setName(playerName.getText());
                     LobbyListView lobbyListView = new LobbyListView();
                     ScreenController.getInstance().addScreen("lobbylist",lobbyListView.getPane());

@@ -4,7 +4,12 @@ import com.kamelboyz.kameluno.Model.Card;
 import com.kamelboyz.kameluno.Model.Chat;
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
+import com.kamelboyz.kameluno.Settings.Settings;
 import lombok.Data;
+import lombok.Getter;
+import org.jspace.ActualField;
+import org.jspace.FormalField;
+import org.jspace.RemoteSpace;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
 public class GamePlay {
 
     // temp list to correctly place players
@@ -22,14 +27,28 @@ public class GamePlay {
     private Map<String, Opponent> opponents = new HashMap<>();
 
     private List<Card> playerCards = new ArrayList<>();
-
     private GameBoard gameBoard;
     private ChatView chatView;
     private int lobbyId;
-    public GamePlay(int lobbyId, ChatView chatView){
+    private RemoteSpace gameSpace;
+    public GamePlay(int lobbyId, ChatView chatView) throws IOException, InterruptedException {
         this.lobbyId = lobbyId;
         this.chatView = chatView;
+        gameSpace = new RemoteSpace("tcp://"+ Settings.getInstance().getServerIp() +"/game" + lobbyId + "?keep");
+        getPlayers();
         createGameBoard();
+    }
+    private void getPlayers() throws InterruptedException {
+        String[] playerIds = (String[]) gameSpace.get(
+                new ActualField(Player.getInstance().getName()),
+                new ActualField("players"),
+                new FormalField(String[].class)
+        )[2];
+
+        for (int i = 0; i < playerIds.length; i++) {
+            System.out.println("- " + playerIds[i]);
+            players.add(playerIds[i]);
+        }
     }
 
     private void createGameBoard(){
@@ -40,10 +59,10 @@ public class GamePlay {
     public void calculateOpponentPosition(){
 
         //temporarily adding players
-        players.add("mike");
-        players.add("volkan");
-        players.add("mark");
-        players.add("talha");
+//        players.add("mike");
+//        players.add("volkan");
+//        players.add("mark");
+//        players.add("talha");
 
         //find your position in array
         int myIndex = -1;

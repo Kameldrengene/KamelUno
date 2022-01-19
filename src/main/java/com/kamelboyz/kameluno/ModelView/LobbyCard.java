@@ -69,7 +69,7 @@ public class LobbyCard {
         initializeLabels();
         stage.setScene(scene);
         stage.show();
-        onJoinClick();
+        onJoinClick(this);
     }
     private void initializeLabels(){
         lobbyLabel.setFont(new Font("Arial",24));
@@ -78,25 +78,37 @@ public class LobbyCard {
         lobbyLabel.setLayoutX(50);
         pane.getChildren().add(lobbyLabel);
     }
-    private void onJoinClick(){
+    private void onJoinClick(LobbyCard lobbyCard){
         joinLobby.setOnAction(new EventHandler<ActionEvent>() {
             @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
-                new Thread(new JoinLobby(lobbyId)).start();
+                new Thread(new JoinLobby(lobbyId, lobbyCard)).start();
+                }
+        });
+    }
+    public void loadLobby() throws IOException {
+        Platform.setImplicitExit(false);
+        Platform.runLater(() -> {
+            try {
                 LobbyView lobbyView = new LobbyView(lobbyId);
                 ScreenController.getInstance().addScreen("lobby"+lobbyId,lobbyView.getPane());
                 ScreenController.getInstance().activate("lobby"+lobbyId);
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         });
+
     }
 }
 
 class JoinLobby implements Runnable{
     private int id;
     private Space space = new SequentialSpace();
-    public JoinLobby(int id){
-        this.id = id;
+    private LobbyCard lobbyCard;
+    public JoinLobby(int id, LobbyCard lobbyCard){
+        this.id = id;this.lobbyCard = lobbyCard;
     }
     @SneakyThrows
     @Override
@@ -106,7 +118,14 @@ class JoinLobby implements Runnable{
         System.out.println("Joining lobby thread!");
         Object[] t = space.get(new FormalField(String.class));
         String resp = t[0]+"";
-        System.out.println(resp);
+        System.out.println("Join thread response: "+resp);
+        if(resp.equals("full")){
+            System.out.println("Response was: " + resp);
+            lobbyCard.getJoinLobby().setDisable(true);
+            Platform.runLater(()->lobbyCard.getJoinLobby().setText("Full"));
+        } else{
+            lobbyCard.loadLobby();
+        }
         System.out.println("Joined field!");
     }
 }

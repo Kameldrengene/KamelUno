@@ -3,7 +3,11 @@ package com.kamelboyz.kameluno.ModelView;
 import com.kamelboyz.kameluno.Model.Card;
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
+import com.kamelboyz.kameluno.Settings.Settings;
 import lombok.Data;
+import org.jspace.ActualField;
+import org.jspace.FormalField;
+import org.jspace.RemoteSpace;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,8 +30,13 @@ public class GamePlay {
 
     private int lobbyId;
 
-    public GamePlay(int lobbyId){
+    RemoteSpace gameSpace = new RemoteSpace("tcp://"+ Settings.getInstance().getServerIp() +"/gameId?keep");
+
+
+
+    public GamePlay(int lobbyId) throws IOException, InterruptedException {
         this.lobbyId = lobbyId;
+        getPlayers();
         createGameBoard();
     }
 
@@ -35,6 +44,19 @@ public class GamePlay {
         calculateOpponentPosition();
         initialCards();
         gameBoard = new GameBoard(playerCards,opponents,lobbyId);
+    }
+
+    private void getPlayers() throws InterruptedException {
+        String[] playerIds = (String[]) gameSpace.get(
+                new ActualField(Player.getInstance().getName()),
+                new ActualField("players"),
+                new FormalField(String[].class)
+        )[2];
+
+        for (int i = 0; i < playerIds.length; i++) {
+            System.out.println("- " + playerIds[i]);
+            players.add(playerIds[i]);
+        }
     }
     public void calculateOpponentPosition(){
 
@@ -92,4 +114,5 @@ public class GamePlay {
 
     }
 }
+
 

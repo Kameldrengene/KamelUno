@@ -79,6 +79,7 @@ public class LobbyView {
 
     private void onLobbyStartClick(){
         startButton.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
                 GamePlay gamePlay = new GamePlay(lobbyId);

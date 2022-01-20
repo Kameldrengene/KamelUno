@@ -56,7 +56,7 @@ public class GamePlay {
     private void createGameBoard() throws InterruptedException {
         calculateOpponentPosition();
         gameBoard = new GameBoard(opponents,lobbyId, chatView);
-        gameBoard.getPane().setDisable(true);
+        gameBoard.setPaneDisable(true);
         new Thread(new ClientHand(Player.getInstance().getName(),playerCards,gameSpace,gameBoard)).start();
         new Thread(new TakeTurn(gameSpace,gameBoard)).start();
         new Thread(new TurnWatcher(Player.getInstance().getName(),gameSpace,gameBoard)).start();
@@ -264,7 +264,7 @@ class TakeTurn implements Runnable{
                 gameSpace.put(Player.getInstance().getName(), "taken");
                 Platform.runLater(()->{
                     System.out.println("board enabled for you");
-                    gameBoard.getPane().setDisable(false);
+                    gameBoard.setPaneDisable(false);
                     gameBoard.setTurnText("Your Turn");
                 });
             }

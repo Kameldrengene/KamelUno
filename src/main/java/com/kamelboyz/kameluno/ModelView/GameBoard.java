@@ -43,6 +43,7 @@ public class GameBoard {
     private Group deck = new Group();
     private StackPane pile = new StackPane();
     private Text turnText = new Text();
+    private ArrayList<Pane> panes = new ArrayList<>();
 
     private Map<String, Opponent> opponents;
     private int lobbyId;
@@ -55,6 +56,12 @@ public class GameBoard {
         setRootLayout();
         initLayouts();
         onDeckClick();
+    }
+
+    public void setPaneDisable(boolean b){
+        for (Pane p : panes){
+            p.setDisable(b);
+        }
     }
 
     public void setRootLayout(){
@@ -81,11 +88,17 @@ public class GameBoard {
 
         //create left, middle and right vertical boxes
         try {
-            rootLayout.getChildren().addAll(createLeftBox(), createMiddleBox(), createRightBox());
+            Pane lb = createLeftBox();
+            Pane mb = createMiddleBox();
+            Pane rb = createRightBox();
+            rootLayout.getChildren().addAll(lb,mb,rb);
+            panes.add(mb);
+            panes.add(rb);
         } catch (IOException e) {
             e.printStackTrace();
         }
         pane.getChildren().addAll(rootLayout);
+
 
     }
 
@@ -94,6 +107,7 @@ public class GameBoard {
         BorderPane leftBox = new BorderPane();
         leftBox.setPrefWidth(bounds.getWidth() * 0.2);
         HBox hBox = initOpponent3CardsLayout();
+        panes.add(hBox);
         leftBox.setCenter(hBox);
         leftBox.setBottom(chatView.getChatWindow());
         return leftBox;

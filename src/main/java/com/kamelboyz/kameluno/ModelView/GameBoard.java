@@ -41,7 +41,7 @@ public class GameBoard {
     private Group opponent3CardsLayout = new Group();
     private Group deck = new Group();
     private StackPane pile = new StackPane();
-
+    private Text turnText = new Text();
 
     private Map<String, Opponent> opponents;
     private int lobbyId;
@@ -128,7 +128,11 @@ public class GameBoard {
         hBox.getChildren().addAll(pile,deck);
         hBox.setAlignment(Pos.CENTER);
 
-        midBox.setCenter(hBox);
+        VBox vBox = new VBox(40);
+        vBox.getChildren().addAll(hBox,turnText);
+        vBox.setAlignment(Pos.CENTER);
+
+        midBox.setCenter(vBox);
 
 
         return midBox;
@@ -351,6 +355,13 @@ public class GameBoard {
         }
     }
 
+    public void setTurnText(String playerName){
+        turnText.setText(playerName);
+        //Setting font to the text
+        turnText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        turnText.setFill(Color.GREENYELLOW);
+        turnText.setX(bounds.getWidth()*0.5);
+    }
 
 
 

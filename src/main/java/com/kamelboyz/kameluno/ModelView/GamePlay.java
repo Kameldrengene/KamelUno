@@ -2,23 +2,20 @@ package com.kamelboyz.kameluno.ModelView;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+
 import com.kamelboyz.kameluno.Model.Card;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kamelboyz.kameluno.Model.Chat;
+
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
 import com.kamelboyz.kameluno.Settings.Settings;
 import javafx.application.Platform;
-import lombok.Data;
-import com.google.gson.Gson;
 import lombok.Getter;
-import org.jspace.ActualField;
-import org.jspace.FormalField;
-import org.jspace.RemoteSpace;
+import org.jspace.*;
+
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 public class GamePlay {
@@ -56,10 +53,58 @@ public class GamePlay {
 
     }
 
-    private void createGameBoard(){
+    private void createGameBoard() throws InterruptedException {
         calculateOpponentPosition();
         gameBoard = new GameBoard(opponents,lobbyId, chatView);
+        gameBoard.getPane().setDisable(true);
         new Thread(new ClientHand(Player.getInstance().getName(),playerCards,gameSpace,gameBoard)).start();
+        new Thread(new TakeTurn(gameSpace,gameBoard)).start();
+        new Thread(new TurnWatcher(Player.getInstance().getName(),gameSpace,gameBoard)).start();
+        TimeUnit.SECONDS.sleep(1);
+
+        // Notify server the thread is ready
+        gameSpace.put(Player.getInstance().getName(), "ready");
+
+        // Wait until all players are ready
+        gameSpace.get(
+                new ActualField(Player.getInstance().getName()),
+                new ActualField("allReady")
+        );
+
+
+    }
+
+    public boolean takeTurn() throws InterruptedException {
+        // Wait for my turn
+        String status = (String) gameSpace.get(
+                new ActualField(Player.getInstance().getName()),
+                new ActualField("take"),
+                new FormalField(String.class)
+        )[2];
+
+        System.out.println("its my turn "+ Player.getInstance().getName());
+
+        //Check if game is done
+        if (!status.equals("alive")) {
+
+            // update GUI to show winner or lose screen
+            System.out.println("\nThe Winner is: " + status + "!");
+
+            return false;
+        }
+
+
+        // Take turn
+        gameSpace.put(Player.getInstance().getName(), "taken");
+
+        Platform.runLater(()->{
+            System.out.println("Your turn!");
+            //gameBoard.getPane().setDisable(false);
+        });
+
+        //
+
+        return true;
     }
 
     public void calculateOpponentPosition(){
@@ -126,6 +171,7 @@ class ClientHand implements Runnable{
                         new ActualField("cards"),
                         new FormalField(String.class)
                 );
+                System.out.println("cards received");
                 System.out.println(hand[2]+"");
                 ObjectMapper objectMapper = new ObjectMapper();
                 Card[] cards = objectMapper.readValue(hand[2]+"",Card[].class);
@@ -157,6 +203,74 @@ class BoardWatcher{
 
 }
 
-class TurnWatcher{
+class TurnWatcher implements Runnable{
 
+    String playerId;
+    RemoteSpace gameSpace;
+    GameBoard gameBoard;
+
+    public TurnWatcher(String playerId, RemoteSpace gameSpace,GameBoard gameBoard) {
+        this.playerId = playerId;
+        this.gameSpace = gameSpace;
+        this.gameBoard = gameBoard;
+    }
+    @Override
+    public void run() {
+        try {
+            while (true){
+                String player = (String) gameSpace.get(
+                        new ActualField(playerId),
+                        new ActualField("takes"),
+                        new FormalField(String.class)
+                )[2];
+                if(!player.equals(Player.getInstance().getName())){
+                    //take turn
+                    Platform.runLater(()->{
+                        System.out.println(player+ " has the turn");
+                        gameBoard.setTurnText(player+ " has the turn");
+                    });
+
+                }
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class TakeTurn implements Runnable{
+    RemoteSpace gameSpace;
+    GameBoard gameBoard;
+    public TakeTurn(RemoteSpace gameSpace,GameBoard gameBoard){
+      this.gameSpace = gameSpace;
+      this.gameBoard = gameBoard;
+    }
+    @Override
+    public void run() {
+        try {
+            while (true){
+                // Wait for my turn
+                String status = (String) gameSpace.get(
+                        new ActualField(Player.getInstance().getName()),
+                        new ActualField("take"),
+                        new FormalField(String.class)
+                )[2];
+
+                System.out.println("its my turn "+ Player.getInstance().getName());
+
+                if(!status.equals("alive")) break;
+
+                // Take turn
+                gameSpace.put(Player.getInstance().getName(), "taken");
+                Platform.runLater(()->{
+                    System.out.println("board enabled for you");
+                    gameBoard.getPane().setDisable(false);
+                    gameBoard.setTurnText("Your Turn");
+                });
+            }
+
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

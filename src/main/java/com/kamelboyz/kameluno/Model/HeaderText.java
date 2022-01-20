@@ -17,14 +17,14 @@ public class HeaderText {
 
         text.setTextAlignment(TextAlignment.CENTER);
         text.setX(bounds.getWidth() / 2 - text.getLayoutBounds().getWidth() / 2);
-        text.setY(bounds.getHeight() / 7);
+        text.setY(bounds.getHeight() / 6);
         text.setFill(Color.rgb(255, 255, 255, 0.7));
-        Reflection reflection = new Reflection();
-        reflection.setTopOffset(0);
-        reflection.setTopOpacity(0.75);
-        reflection.setBottomOpacity(0.0);
-        reflection.setFraction(0.7);
-        text.setEffect(reflection);
+//        Reflection reflection = new Reflection();
+//        reflection.setTopOffset(0);
+//        reflection.setTopOpacity(0.75);
+//        reflection.setBottomOpacity(0.0);
+//        reflection.setFraction(0.7);
+//        text.setEffect(reflection);
         return text;
     }
 }

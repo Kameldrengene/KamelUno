@@ -3,7 +3,7 @@ package com.kamelboyz.kameluno.Settings;
 
 public class Settings {
     private static Settings single_instance;
-    private final String serverIp = "runerne.dk:9001";
+    private final String serverIp = "localhost:9001";
 
     public String getServerIp() {
         return serverIp;

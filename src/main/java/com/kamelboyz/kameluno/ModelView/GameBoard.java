@@ -43,13 +43,11 @@ public class GameBoard {
     private StackPane pile = new StackPane();
 
 
-    private List<Card> playerCards;
     private Map<String, Opponent> opponents;
     private int lobbyId;
     private ChatView chatView;
 
-    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents,int lobbyId, ChatView chatView) {
-        this.playerCards = playerCards;
+    public GameBoard( Map<String, Opponent> opponents,int lobbyId, ChatView chatView) {
         this.opponents = opponents;
         this.lobbyId = lobbyId;
         this.chatView = chatView;
@@ -146,30 +144,6 @@ public class GameBoard {
 
     public VBox initPlayerCardsLayout (BorderPane borderPaneP) throws IOException {
         VBox vBox = new VBox(10);
-        double xPosPlayerCards = playerCardsLayout.getLayoutX();
-        int i = 0;
-
-        for (Card card:playerCards) {
-            String cardName = card.getColor()+"_"+card.getValue();
-            ImageView imageView = getImage(cardName,Type.HORIZONTAL);
-            imageView.setX(xPosPlayerCards+(i*60));
-            imageView.setUserData(cardName);
-            imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
-                System.out.println("clicked ");
-                System.out.println(imageView.getUserData());
-                try {
-                    WinView winView = new WinView(bounds.getWidth(),bounds.getHeight());
-                    LoseView loseView = new LoseView("Mike", bounds.getWidth(),bounds.getHeight());
-                    VBox vBox1 = loseView.getVBox();
-                    borderPaneP.getChildren().remove(borderPaneP.getCenter());
-                    borderPaneP.setCenter(vBox1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            playerCardsLayout.getChildren().add(imageView);
-            i++;
-        }
         Text name = new Text();
         name.setText(Player.getInstance().getName());
         //Setting font to the text
@@ -325,10 +299,29 @@ public class GameBoard {
     }
 
 
+
     public void updatePile(String cardName) throws IOException {
         pile.getChildren().add(getImage(cardName,Type.HORIZONTAL));
     }
 
+    public void updatePlayerCards(List<Card> playerCards) throws IOException {
+        double xPosPlayerCards = playerCardsLayout.getLayoutX();
+        int i = 0;
+
+        for (Card card:playerCards) {
+            String cardName = card.getColor()+"_"+card.getValue();
+            ImageView imageView = getImage(cardName,Type.HORIZONTAL);
+            imageView.setX(xPosPlayerCards+(i*60));
+            imageView.setUserData(cardName);
+            imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
+                System.out.println("clicked ");
+                System.out.println(imageView.getUserData());
+
+            });
+            playerCardsLayout.getChildren().add(imageView);
+            i++;
+        }
+    }
 
     public void updateOpponentCardLayout(Opponent opponent) throws IOException {
         if (opponent.getPosition()==1){

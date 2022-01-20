@@ -20,6 +20,7 @@ import java.util.Map;
 @Getter
 public class GamePlay {
 
+
     // temp list to correctly place players
     private List<String> players = new ArrayList<>();
 
@@ -49,33 +50,17 @@ public class GamePlay {
             System.out.println("- " + playerIds[i]);
             players.add(playerIds[i]);
         }
+
     }
 
     private void createGameBoard(){
         calculateOpponentPosition();
-        initialCards();
-        gameBoard = new GameBoard(playerCards,opponents,lobbyId, chatView);
+        gameBoard = new GameBoard(opponents,lobbyId, chatView);
+        new Thread(new ClientHand(Player.getInstance().getName(),playerCards,gameSpace,gameBoard)).start();
     }
 
-    private void getPlayers() throws InterruptedException {
-        String[] playerIds = (String[]) gameSpace.get(
-                new ActualField(Player.getInstance().getName()),
-                new ActualField("players"),
-                new FormalField(String[].class)
-        )[2];
-
-        for (int i = 0; i < playerIds.length; i++) {
-            System.out.println("- " + playerIds[i]);
-            players.add(playerIds[i]);
-        }
-    }
     public void calculateOpponentPosition(){
 
-        //temporarily adding players
-//        players.add("mike");
-//        players.add("volkan");
-//        players.add("mark");
-//        players.add("talha");
 
         //find your position in array
         int myIndex = -1;
@@ -98,20 +83,7 @@ public class GamePlay {
 
 
 
-    public void initialCards(){
-        // temporarily adding cards
-        playerCards.add(new Card("Red", "1"));
-        playerCards.add(new Card("Blue", "1"));
-        playerCards.add(new Card("Green", "1"));
-        playerCards.add(new Card("Red", "2"));
-        playerCards.add(new Card("Blue", "2"));
-        playerCards.add(new Card("Green", "2"));
-        playerCards.add(new Card("Yellow", "3"));
-        playerCards.add(new Card("Blue", "3"));
-        playerCards.add(new Card("Red", "3"));
-        playerCards.add(new Card("Green", "3"));
-        playerCards.add(new Card("Black", "Draw"));
-    }
+
 
     public void updateBoard() throws IOException {
         //update top card
@@ -127,3 +99,76 @@ public class GamePlay {
 }
 
 
+class ClientHand implements Runnable{
+    String playerId;
+    RemoteSpace gameSpace;
+    List<Card> playerCards;
+    GameBoard gameBoard;
+
+    public ClientHand(String playerId, List<Card> playerCards, RemoteSpace gameSpace, GameBoard gameBoard) {
+        this.playerId = playerId;
+        this.playerCards = playerCards;
+        this.gameSpace = gameSpace;
+        this.gameBoard = gameBoard;
+    }
+
+
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                System.out.println("before here");
+
+                // Wait for signal
+                /*String hand = (String) gameSpace.get(
+                        new ActualField(Player.getInstance().getName()),
+                        new ActualField("cards"),
+                        new FormalField(String.class)
+                )[2];
+
+                System.out.println(hand);
+                String hand1 = "{"+hand+"}";
+                JSONObject root = new JSONObject(hand1);
+                System.out.println(root.getJSONObject("0").getString("color"));*/
+
+
+
+                Card[] hand = (Card[]) gameSpace.get(
+                        new ActualField(playerId),
+                        new ActualField("cards"),
+                        new FormalField(Card[].class)
+                )[2];
+
+
+
+                System.out.println("im here");
+
+
+                /*System.out.println((String) hand);
+                ObjectMapper mapper = new ObjectMapper();
+                ArrayList<Object> objects = mapper.readValue((String) hand, ArrayList.class);
+                for (int i = 0; i < objects.size(); i++) {
+                    System.out.println(objects.get(i));
+                }*/
+
+
+
+                //System.out.println(Arrays.toString(hand));
+                // GUI
+//                playerCards.addAll(Arrays.asList(hand));
+//                gameBoard.updatePlayerCards(playerCards);
+
+
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+class BoardWatcher{
+
+}
+
+class TurnWatcher{
+
+}

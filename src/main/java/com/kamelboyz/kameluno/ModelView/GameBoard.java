@@ -1,5 +1,6 @@
 package com.kamelboyz.kameluno.ModelView;
 
+import com.kamelboyz.kameluno.Model.BootstrapButton;
 import com.kamelboyz.kameluno.Model.Card;
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
@@ -145,6 +146,9 @@ public class GameBoard {
         rightBox.setCenter(hBox);
         return rightBox;
     }
+    //TODO: Make buttons do stuff
+    private Button unoBtn = BootstrapButton.makeBootstrapButton("UNO!","btn-success");
+    private Button noUnoBtn = BootstrapButton.makeBootstrapButton("Forgot UNO!","btn-danger");
 
     public VBox initPlayerCardsLayout (BorderPane borderPaneP) throws IOException {
         VBox vBox = new VBox(10);
@@ -155,10 +159,16 @@ public class GameBoard {
         name.setFill(Color.DEEPSKYBLUE);
         name.setX(bounds.getWidth()*0.5);
         BorderPane borderPane = new BorderPane();
+        BorderPane unoPane = new BorderPane();
         borderPane.setCenter(name);
+        HBox unoBtns = new HBox();
+        unoBtns.getChildren().add(unoBtn);
+        unoBtns.getChildren().add(noUnoBtn);
+        unoBtns.setAlignment(Pos.CENTER);
+        unoPane.setCenter(unoBtns);
         BorderPane cardsBorder = new BorderPane();
         cardsBorder.setCenter(playerCardsLayout);
-        vBox.getChildren().addAll(borderPane,cardsBorder);
+        vBox.getChildren().addAll(unoPane,borderPane,cardsBorder);
         return vBox;
     }
     public HBox initOpponent3CardsLayout() throws IOException {

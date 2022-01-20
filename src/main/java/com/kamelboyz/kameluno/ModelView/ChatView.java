@@ -91,6 +91,10 @@ public class ChatView {
     private TextArea chatMessages = new TextArea();
     private Space clientChat = new SequentialSpace();
 
+    public TextArea getChatMessages() {
+        return chatMessages;
+    }
+
     private void initializeChatWindow() throws IOException {
         chat = new Chat(inputChat, clientChat, name, id);
         new Thread(chat).start();

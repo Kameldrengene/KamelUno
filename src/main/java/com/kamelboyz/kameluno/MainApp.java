@@ -49,7 +49,7 @@ public class MainApp extends Application {
         OnEscape.exitOnEsc(scene, stage);
 
         //Setting title to the Stage
-        stage.setTitle("Kamel Ludo");
+        stage.setTitle("Kamel UNO");
         stage.setFullScreen(true);
         //Adding scene to the stage
         stage.setScene(scene);

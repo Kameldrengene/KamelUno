@@ -1,15 +1,16 @@
 package com.kamelboyz.kameluno.Model;
 
+import com.kamelboyz.kameluno.Model.Card;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-public class Card{
-    private String color;
-    private String value;
+public class Board {
+    Card topCard;
+    Map<String, Integer> hands;
 }

@@ -1,8 +1,9 @@
 package com.kamelboyz.kameluno.ModelView;
 
-import com.kamelboyz.kameluno.Model.Card;
-import com.kamelboyz.kameluno.Model.Opponent;
-import com.kamelboyz.kameluno.Model.Player;
+import com.kamelboyz.kameluno.Model.BootstrapButton;
+import com.google.gson.Gson;
+import com.kamelboyz.kameluno.Model.*;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,17 +13,13 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.RadialGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.text.*;
 import javafx.stage.Screen;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.jspace.RemoteSpace;
 
 import java.io.*;
 import java.util.*;
@@ -41,21 +38,31 @@ public class GameBoard {
     private Group opponent3CardsLayout = new Group();
     private Group deck = new Group();
     private StackPane pile = new StackPane();
+    private Text turnText = new Text();
+    private ArrayList<Pane> panes = new ArrayList<>();
 
-
-    private List<Card> playerCards;
     private Map<String, Opponent> opponents;
     private int lobbyId;
     private ChatView chatView;
+    private RemoteSpace gameSpace;
+    private Actions lastPlayed;
+    private Button endTurnBtn = BootstrapButton.makeBootstrapButton("End Turn!", "btn-info");
 
-    public GameBoard(List<Card> playerCards, Map<String, Opponent> opponents,int lobbyId, ChatView chatView) {
-        this.playerCards = playerCards;
+    public GameBoard(Map<String, Opponent> opponents, int lobbyId, ChatView chatView, RemoteSpace gameSpace,Actions lastPlayed) {
         this.opponents = opponents;
         this.lobbyId = lobbyId;
         this.chatView = chatView;
+        this.gameSpace = gameSpace;
+        this.lastPlayed = lastPlayed;
         setRootLayout();
         initLayouts();
         onDeckClick();
+    }
+
+    public void setPaneDisable(boolean b){
+        for (Pane p : panes){
+            p.setDisable(b);
+        }
     }
 
     public void setRootLayout(){
@@ -82,11 +89,17 @@ public class GameBoard {
 
         //create left, middle and right vertical boxes
         try {
-            rootLayout.getChildren().addAll(createLeftBox(), createMiddleBox(), createRightBox());
+            Pane lb = createLeftBox();
+            Pane mb = createMiddleBox();
+            Pane rb = createRightBox();
+            rootLayout.getChildren().addAll(lb,mb,rb);
+            panes.add(mb);
+            panes.add(rb);
         } catch (IOException e) {
             e.printStackTrace();
         }
         pane.getChildren().addAll(rootLayout);
+
 
     }
 
@@ -95,6 +108,7 @@ public class GameBoard {
         BorderPane leftBox = new BorderPane();
         leftBox.setPrefWidth(bounds.getWidth() * 0.2);
         HBox hBox = initOpponent3CardsLayout();
+        panes.add(hBox);
         leftBox.setCenter(hBox);
         leftBox.setBottom(chatView.getChatWindow());
         return leftBox;
@@ -130,7 +144,11 @@ public class GameBoard {
         hBox.getChildren().addAll(pile,deck);
         hBox.setAlignment(Pos.CENTER);
 
-        midBox.setCenter(hBox);
+        VBox vBox = new VBox(40);
+        vBox.getChildren().addAll(hBox,turnText);
+        vBox.setAlignment(Pos.CENTER);
+
+        midBox.setCenter(vBox);
 
 
         return midBox;
@@ -143,33 +161,12 @@ public class GameBoard {
         rightBox.setCenter(hBox);
         return rightBox;
     }
+    //TODO: Make buttons do stuff
+    private Button unoBtn = BootstrapButton.makeBootstrapButton("UNO!","btn-success");
+    private Button noUnoBtn = BootstrapButton.makeBootstrapButton("Forgot UNO!","btn-danger");
 
     public VBox initPlayerCardsLayout (BorderPane borderPaneP) throws IOException {
         VBox vBox = new VBox(10);
-        double xPosPlayerCards = playerCardsLayout.getLayoutX();
-        int i = 0;
-
-        for (Card card:playerCards) {
-            String cardName = card.getColor()+"_"+card.getValue();
-            ImageView imageView = getImage(cardName,Type.HORIZONTAL);
-            imageView.setX(xPosPlayerCards+(i*60));
-            imageView.setUserData(cardName);
-            imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
-                System.out.println("clicked ");
-                System.out.println(imageView.getUserData());
-                try {
-                    WinView winView = new WinView(bounds.getWidth(),bounds.getHeight());
-                    LoseView loseView = new LoseView("Mike", bounds.getWidth(),bounds.getHeight());
-                    VBox vBox1 = loseView.getVBox();
-                    borderPaneP.getChildren().remove(borderPaneP.getCenter());
-                    borderPaneP.setCenter(vBox1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            playerCardsLayout.getChildren().add(imageView);
-            i++;
-        }
         Text name = new Text();
         name.setText(Player.getInstance().getName());
         //Setting font to the text
@@ -177,12 +174,65 @@ public class GameBoard {
         name.setFill(Color.DEEPSKYBLUE);
         name.setX(bounds.getWidth()*0.5);
         BorderPane borderPane = new BorderPane();
+        BorderPane unoPane = new BorderPane();
         borderPane.setCenter(name);
+        HBox unoBtns = new HBox();
+        unoBtns.getChildren().add(unoBtn);
+        unoBtns.getChildren().add(noUnoBtn);
+        unoBtns.getChildren().add(endTurnBtn);
+        setEndTurnDisable(true);
+        unoBtns.setAlignment(Pos.CENTER);
+        unoPane.setCenter(unoBtns);
         BorderPane cardsBorder = new BorderPane();
         cardsBorder.setCenter(playerCardsLayout);
-        vBox.getChildren().addAll(borderPane,cardsBorder);
+        onEndTurn();
+        onUnoClick();
+        onUnoForgottenClick();
+        vBox.getChildren().addAll(unoPane,borderPane,cardsBorder);
         return vBox;
     }
+
+    private void onEndTurn() {
+        endTurnBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                new Thread(()->{
+                    try {
+                        Thread.sleep(500);
+                        gameSpace.put(Player.getInstance().getName(), "ended");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+                setPaneDisable(true);
+                setEndTurnDisable(true);
+            }
+        });
+    }
+
+    private void onUnoClick(){
+        unoBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                gameSpace.put(Player.getInstance().getName(), "UNO");
+                chatView.getChatMessages().appendText("Clicked UNO!\n");
+            }
+        });
+    }
+
+    private void onUnoForgottenClick(){
+        noUnoBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                gameSpace.put(Player.getInstance().getName(), "missingUNO");
+                chatView.getChatMessages().appendText("Clicked missing uno!\n");
+            }
+        });
+    }
+
     public HBox initOpponent3CardsLayout() throws IOException {
         HBox hBox = new HBox(10);
         Opponent opponent = null;
@@ -319,16 +369,51 @@ public class GameBoard {
             @SneakyThrows
             @Override
             public void handle(MouseEvent mouseEvent) {
-                // send request to server with jSpace
+                Gson gson = new Gson();
+                gameSpace.put(
+                        Player.getInstance().getName(),
+                        "action",
+                        gson.toJson(new Action(Actions.DRAW,new Card()))
+                );
+                lastPlayed = Actions.DRAW;
             }
         });
     }
+
 
 
     public void updatePile(String cardName) throws IOException {
         pile.getChildren().add(getImage(cardName,Type.HORIZONTAL));
     }
 
+    public void updatePlayerCards(List<Card> playerCards) throws IOException {
+        double xPosPlayerCards = playerCardsLayout.getLayoutX();
+        int i = 0;
+        playerCardsLayout.getChildren().clear();
+        for (Card card:playerCards) {
+            String cardName = card.getColor()+"_"+card.getValue();
+            ImageView imageView = getImage(cardName,Type.HORIZONTAL);
+            imageView.setX(xPosPlayerCards+(i*60));
+            imageView.setUserData(card);
+            imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
+                System.out.println("clicked ");
+                System.out.println(imageView.getUserData());
+                Card cardToPlay = (Card) imageView.getUserData();
+                Gson gson = new Gson();
+                try {
+                    gameSpace.put(
+                            Player.getInstance().getName(),
+                            "action",
+                            gson.toJson(new Action(Actions.PLAY, cardToPlay))
+                    );
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+            playerCardsLayout.getChildren().add(imageView);
+            i++;
+        }
+    }
 
     public void updateOpponentCardLayout(Opponent opponent) throws IOException {
         if (opponent.getPosition()==1){
@@ -358,9 +443,17 @@ public class GameBoard {
         }
     }
 
+    public void setTurnText(String playerName){
+        turnText.setText(playerName);
+        //Setting font to the text
+        turnText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+        turnText.setFill(Color.GREENYELLOW);
+        turnText.setX(bounds.getWidth()*0.5);
+    }
 
-
-
+    public void setEndTurnDisable(boolean b) {
+        endTurnBtn.setDisable(b);
+    }
 }
 
 enum Type{

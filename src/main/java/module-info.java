@@ -10,8 +10,13 @@ module com.kamelboyz.kameluno {
     requires eu.hansolo.tilesfx;
     requires lombok;
     requires common;
+    requires com.google.gson;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.core;
 
 
     opens com.kamelboyz.kameluno to javafx.fxml;
+    opens com.kamelboyz.kameluno.Model to com.google.gson;
     exports com.kamelboyz.kameluno;
+    exports com.kamelboyz.kameluno.Model;
 }

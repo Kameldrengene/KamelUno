@@ -4,12 +4,15 @@ import com.kamelboyz.kameluno.Controller.ScreenController;
 import com.kamelboyz.kameluno.Model.HeaderText;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.effect.Reflection;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -34,20 +37,27 @@ public class MainView {
     private final Group root = new Group();
     public MainView() throws IOException {
         Text text = new Text();
-        buttons.put("PlayButton", makeBootstrapButton("Play", "btn-success"));
         buttons.put("SettingsButton", makeBootstrapButton("Settings", "btn-info"));
-        buttons.put("_QuitButton", makeBootstrapButton("Quit", "btn-danger")); //_QuitButton to make it appear last when adding to MAP
+        buttons.put("QuitButton", makeBootstrapButton("Quit", "btn-danger")); //_QuitButton to make it appear last when adding to MAP
+        buttons.put("PlayButton", makeBootstrapButton("Play", "btn-success"));
+
 
 
         //Setting the text to be added.
         text.setText("Kamel UNO");
         text = HeaderText.setTextProperties(text);
-        alignButtonsInMiddle();
+        VBox btnBox = new VBox();
 
         root.getChildren().add(text);
-        for (var entry : buttons.entrySet()) {
-            root.getChildren().add(entry.getValue());
-        }
+        btnBox.getChildren().add(buttons.get("PlayButton"));
+        //btnBox.getChildren().add(buttons.get("SettingsButton"));
+        btnBox.getChildren().add(buttons.get("QuitButton"));
+        setButtonWidth();
+        btnBox.setAlignment(Pos.CENTER);
+        btnBox.setSpacing(30);
+        btnBox.setLayoutX(bounds.getWidth()/2-bounds.getWidth() / 4);
+        btnBox.setLayoutY(bounds.getHeight()/2);
+        root.getChildren().add(btnBox);
         initializeSettingsWindow();
 
     }
@@ -116,7 +126,7 @@ public class MainView {
         showSettings = !showSettings;
     }
     private void onExitClick(Scene scene) {
-        Button quitButton = buttons.get("_QuitButton");
+        Button quitButton = buttons.get("QuitButton");
         quitButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
@@ -145,14 +155,12 @@ public class MainView {
     }
 
 
-    private void alignButtonsInMiddle() {
+    private void setButtonWidth() {
         int i = buttons.size();
         for (var entry : buttons.entrySet()) {
             entry.getValue().setMaxSize(bounds.getWidth(), bounds.getHeight() / 20);
             entry.getValue().setMinSize(bounds.getWidth() / 2, bounds.getHeight() / 20);
             entry.getValue().setPrefWidth(bounds.getWidth() / 2);
-            entry.getValue().setLayoutY(((bounds.getHeight() / (20)) + (i * 80)) + bounds.getHeight() / 3);
-            entry.getValue().setLayoutX((bounds.getWidth() / 4));
             i--;
         }
     }

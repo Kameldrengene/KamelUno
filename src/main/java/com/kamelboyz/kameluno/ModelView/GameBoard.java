@@ -3,6 +3,7 @@ package com.kamelboyz.kameluno.ModelView;
 import com.kamelboyz.kameluno.Model.BootstrapButton;
 import com.google.gson.Gson;
 import com.kamelboyz.kameluno.Model.*;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -45,6 +46,7 @@ public class GameBoard {
     private ChatView chatView;
     private RemoteSpace gameSpace;
     private Actions lastPlayed;
+    private Button endTurnBtn = BootstrapButton.makeBootstrapButton("End Turn!", "btn-info");
 
     public GameBoard(Map<String, Opponent> opponents, int lobbyId, ChatView chatView, RemoteSpace gameSpace,Actions lastPlayed) {
         this.opponents = opponents;
@@ -177,13 +179,28 @@ public class GameBoard {
         HBox unoBtns = new HBox();
         unoBtns.getChildren().add(unoBtn);
         unoBtns.getChildren().add(noUnoBtn);
+        unoBtns.getChildren().add(endTurnBtn);
+        setEndTurnDisable(true);
         unoBtns.setAlignment(Pos.CENTER);
         unoPane.setCenter(unoBtns);
         BorderPane cardsBorder = new BorderPane();
         cardsBorder.setCenter(playerCardsLayout);
+        onEndTurn();
         vBox.getChildren().addAll(unoPane,borderPane,cardsBorder);
         return vBox;
     }
+
+    private void onEndTurn() {
+        endTurnBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                gameSpace.put(Player.getInstance().getName(), "ended");
+                setPaneDisable(true);
+            }
+        });
+    }
+
     public HBox initOpponent3CardsLayout() throws IOException {
         HBox hBox = new HBox(10);
         Opponent opponent = null;
@@ -324,10 +341,9 @@ public class GameBoard {
                 gameSpace.put(
                         Player.getInstance().getName(),
                         "action",
-                        gson.toJson(new Action(Actions.DRAW,null))
+                        gson.toJson(new Action(Actions.DRAW,new Card()))
                 );
                 lastPlayed = Actions.DRAW;
-                pane.setDisable(true);
             }
         });
     }
@@ -403,6 +419,9 @@ public class GameBoard {
         turnText.setX(bounds.getWidth()*0.5);
     }
 
+    public void setEndTurnDisable(boolean b) {
+        endTurnBtn.setDisable(b);
+    }
 }
 
 enum Type{

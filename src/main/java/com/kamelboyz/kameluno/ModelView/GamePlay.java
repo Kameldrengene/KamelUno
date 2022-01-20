@@ -306,21 +306,19 @@ class PerformAction implements Runnable{
             )[1];
 
             System.out.println("got response " + response);
+            if(response.equals("success")){
+//                gameSpace.put(playerId, "ended");
+                System.out.println("got success response");
+                Platform.runLater(()->{
+                    gameBoard.setEndTurnDisable(false);
+                });
+            } else if (response.equals("invalid")){
+                System.out.println("invalid play, try again!");
+                Platform.runLater(()->{
+                    gameBoard.setEndTurnDisable(true);
+                });
+            }
 
-            Platform.runLater(()->{
-                if(response.equals("success")){
-                    try {
-                        gameSpace.put(playerId, "ended");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    gameBoard.getPane().setDisable(true);
-                    System.out.println("got success response");
-                }else if(response.equals("invalid")) {
-                    System.out.println("invalid play, try again!");
-                    gameBoard.getPane().setDisable(false);
-                }
-            });
             break action;
         }
         } catch (InterruptedException e) {

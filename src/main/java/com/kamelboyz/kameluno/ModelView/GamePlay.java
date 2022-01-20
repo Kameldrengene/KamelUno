@@ -1,16 +1,21 @@
 package com.kamelboyz.kameluno.ModelView;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.kamelboyz.kameluno.Model.Card;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kamelboyz.kameluno.Model.Chat;
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
 import com.kamelboyz.kameluno.Settings.Settings;
 import lombok.Data;
+import com.google.gson.Gson;
 import lombok.Getter;
 import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -133,14 +138,17 @@ class ClientHand implements Runnable{
 
 
 
-                Card[] hand = (Card[]) gameSpace.get(
+                Object[] hand = gameSpace.get(
                         new ActualField(playerId),
                         new ActualField("cards"),
-                        new FormalField(Card[].class)
-                )[2];
-
-
-
+                        new FormalField(String.class)
+                );
+                System.out.println(hand[2]+"");
+                ObjectMapper objectMapper = new ObjectMapper();
+                Gson gson = new Gson();
+//                Card[] cards = gson.fromJson(JsonParser.parseString(hand[2]+""),Card[].class);
+                Card[] cards = objectMapper.readValue(hand[2]+"",Card[].class);
+                System.out.println(cards);
                 System.out.println("im here");
 
 
@@ -161,6 +169,12 @@ class ClientHand implements Runnable{
 
             }
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

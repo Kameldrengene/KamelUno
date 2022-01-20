@@ -48,7 +48,7 @@ public class LobbyView {
         BackgroundFill bgFill = new BackgroundFill(new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK)), CornerRadii.EMPTY, Insets.EMPTY);
         pane.setBackground(new Background(bgFill));
         inLobby = true;
-        startButton = BootstrapButton.makeBootstrapButton("Start", "btn-info");
+        startButton = BootstrapButton.makeBootstrapButton("0/4", "btn-info");
         text.setText("Lobby");
         this.lobbyId = lobbyId;
         text = HeaderText.setTextProperties(text);
@@ -125,6 +125,11 @@ public class LobbyView {
             @Override
             public void run() {
                 alignPlayers();
+                if(players.size() < 4){
+                    startButton.setText(players.size()+"/4");
+                } else {
+                    startButton.setText("Start");
+                }
             }
         });
 

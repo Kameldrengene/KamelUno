@@ -30,6 +30,7 @@ public class WinView {
             @Override
             public void handle(ActionEvent actionEvent) {
                 // change scene
+                System.exit(0);
             }
         });
 

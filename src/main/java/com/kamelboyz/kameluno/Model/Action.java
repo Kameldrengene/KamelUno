@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Opponent{
-    private String name;
-    private int position;
-    private int nrCards;
+public class Action {
+    private Actions action;
+    private Card card;
 }
+
+

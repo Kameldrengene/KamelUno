@@ -3,11 +3,9 @@ package com.kamelboyz.kameluno.ModelView;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import com.kamelboyz.kameluno.Model.Card;
+import com.kamelboyz.kameluno.Model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.kamelboyz.kameluno.Model.Opponent;
-import com.kamelboyz.kameluno.Model.Player;
 import com.kamelboyz.kameluno.Settings.Settings;
 import javafx.application.Platform;
 import lombok.Getter;
@@ -32,6 +30,8 @@ public class GamePlay {
     private ChatView chatView;
     private int lobbyId;
     private RemoteSpace gameSpace;
+    private Actions lastPlayed;
+    private boolean gameDone;
     public GamePlay(int lobbyId, ChatView chatView) throws IOException, InterruptedException {
         this.lobbyId = lobbyId;
         this.chatView = chatView;
@@ -55,11 +55,14 @@ public class GamePlay {
 
     private void createGameBoard() throws InterruptedException {
         calculateOpponentPosition();
-        gameBoard = new GameBoard(opponents,lobbyId, chatView);
+        gameBoard = new GameBoard(opponents,lobbyId, chatView,gameSpace,lastPlayed);
         gameBoard.setPaneDisable(true);
         new Thread(new ClientHand(Player.getInstance().getName(),playerCards,gameSpace,gameBoard)).start();
         new Thread(new TakeTurn(gameSpace,gameBoard)).start();
         new Thread(new TurnWatcher(Player.getInstance().getName(),gameSpace,gameBoard)).start();
+        new Thread(new BoardUpdater(gameDone,gameSpace,Player.getInstance().getName(),gameBoard)).start();
+
+
         TimeUnit.SECONDS.sleep(1);
 
         // Notify server the thread is ready
@@ -70,6 +73,9 @@ public class GamePlay {
                 new ActualField(Player.getInstance().getName()),
                 new ActualField("allReady")
         );
+        new Thread(new PerformAction(gameSpace,lastPlayed,gameBoard,Player.getInstance().getName())).start();
+
+
 
 
     }
@@ -229,7 +235,6 @@ class TurnWatcher implements Runnable{
                         System.out.println(player+ " has the turn");
                         gameBoard.setTurnText(player+ " has the turn");
                     });
-
                 }
             }
         } catch (InterruptedException e) {
@@ -263,9 +268,9 @@ class TakeTurn implements Runnable{
                 // Take turn
                 gameSpace.put(Player.getInstance().getName(), "taken");
                 Platform.runLater(()->{
-                    System.out.println("board enabled for you");
-                    gameBoard.setPaneDisable(false);
                     gameBoard.setTurnText("Your Turn");
+                    gameBoard.setPaneDisable(false);
+                    System.out.println("board enabled for you");
                 });
             }
 
@@ -277,10 +282,115 @@ class TakeTurn implements Runnable{
 
 class PerformAction implements Runnable{
 
+    RemoteSpace gameSpace;
+    Actions lastPlayed;
+    GameBoard gameBoard;
+    String playerId;
+    public PerformAction(RemoteSpace gameSpace,Actions lastPlayed, GameBoard gameBoard,String playerId){
+        this.gameSpace = gameSpace;
+        this.lastPlayed = lastPlayed;
+        this.gameBoard = gameBoard;
+        this.playerId = playerId;
+    }
+
     @Override
     public void run() {
-        while (true){
+        try {
 
+            action: while (true){
+
+        // Listen for response
+            String response = (String) gameSpace.get(
+                    new ActualField(playerId),
+                    new FormalField(String.class)
+            )[1];
+
+            System.out.println("got response " + response);
+
+            Platform.runLater(()->{
+                if(response.equals("success")){
+                    try {
+                        gameSpace.put(playerId, "ended");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    gameBoard.getPane().setDisable(true);
+                    System.out.println("got success response");
+                }else if(response.equals("invalid")) {
+                    System.out.println("invalid play, try again!");
+                    gameBoard.getPane().setDisable(false);
+                }
+            });
+            break action;
+        }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class BoardUpdater implements Runnable{
+
+    boolean gameDone;
+    RemoteSpace gameSpace;
+    String playerId;
+    GameBoard gameBoard;
+    public BoardUpdater(boolean gameDone,RemoteSpace gameSpace,String playerId,GameBoard gameBoard){
+        this.gameDone = gameDone;
+        this.gameSpace = gameSpace;
+        this.playerId = playerId;
+        this.gameBoard = gameBoard;
+    }
+    @Override
+    public void run() {
+        try {
+            while (!gameDone) {
+
+                // Wait for signal
+                String boardJson = (String) gameSpace.get(
+                        new ActualField(playerId),
+                        new ActualField("board"),
+                        new FormalField(String.class)
+                )[2];
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                Board board = objectMapper.readValue(boardJson,Board.class);
+
+                Platform.runLater(()->{
+                    Card card = board.getTopCard();
+                    String cardName = card.getColor()+"_"+card.getValue();
+                    try {
+                        gameBoard.updatePile(cardName);
+                        System.out.println("pile updated");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Map<String,Integer> players = board.getHands();
+
+                    for (String key:players.keySet()) {
+
+                        // if it's an opponent
+                        if(!key.equals(Player.getInstance().getName())){
+                            Opponent opponent = gameBoard.getOpponents().get(key);
+                            opponent.setNrCards(players.get(key));
+                            try {
+                                gameBoard.updateOpponentCardLayout(opponent);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    System.out.println("game board updated");
+                });
+            }
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

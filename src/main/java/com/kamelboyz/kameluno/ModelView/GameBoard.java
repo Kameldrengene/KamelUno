@@ -1,9 +1,8 @@
 package com.kamelboyz.kameluno.ModelView;
 
 import com.kamelboyz.kameluno.Model.BootstrapButton;
-import com.kamelboyz.kameluno.Model.Card;
-import com.kamelboyz.kameluno.Model.Opponent;
-import com.kamelboyz.kameluno.Model.Player;
+import com.google.gson.Gson;
+import com.kamelboyz.kameluno.Model.*;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -13,17 +12,13 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.RadialGradient;
-import javafx.scene.paint.Stop;
 import javafx.scene.text.*;
 import javafx.stage.Screen;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.jspace.RemoteSpace;
 
 import java.io.*;
 import java.util.*;
@@ -48,11 +43,15 @@ public class GameBoard {
     private Map<String, Opponent> opponents;
     private int lobbyId;
     private ChatView chatView;
+    private RemoteSpace gameSpace;
+    private Actions lastPlayed;
 
-    public GameBoard( Map<String, Opponent> opponents,int lobbyId, ChatView chatView) {
+    public GameBoard(Map<String, Opponent> opponents, int lobbyId, ChatView chatView, RemoteSpace gameSpace,Actions lastPlayed) {
         this.opponents = opponents;
         this.lobbyId = lobbyId;
         this.chatView = chatView;
+        this.gameSpace = gameSpace;
+        this.lastPlayed = lastPlayed;
         setRootLayout();
         initLayouts();
         onDeckClick();
@@ -321,7 +320,14 @@ public class GameBoard {
             @SneakyThrows
             @Override
             public void handle(MouseEvent mouseEvent) {
-                // send request to server with jSpace
+                Gson gson = new Gson();
+                gameSpace.put(
+                        Player.getInstance().getName(),
+                        "action",
+                        gson.toJson(new Action(Actions.DRAW,null))
+                );
+                lastPlayed = Actions.DRAW;
+                pane.setDisable(true);
             }
         });
     }
@@ -335,16 +341,26 @@ public class GameBoard {
     public void updatePlayerCards(List<Card> playerCards) throws IOException {
         double xPosPlayerCards = playerCardsLayout.getLayoutX();
         int i = 0;
-
+        playerCardsLayout.getChildren().clear();
         for (Card card:playerCards) {
             String cardName = card.getColor()+"_"+card.getValue();
             ImageView imageView = getImage(cardName,Type.HORIZONTAL);
             imageView.setX(xPosPlayerCards+(i*60));
-            imageView.setUserData(cardName);
+            imageView.setUserData(card);
             imageView.addEventHandler(MouseEvent.MOUSE_CLICKED,mouseEvent -> {
                 System.out.println("clicked ");
                 System.out.println(imageView.getUserData());
-
+                Card cardToPlay = (Card) imageView.getUserData();
+                Gson gson = new Gson();
+                try {
+                    gameSpace.put(
+                            Player.getInstance().getName(),
+                            "action",
+                            gson.toJson(new Action(Actions.PLAY, cardToPlay))
+                    );
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             });
             playerCardsLayout.getChildren().add(imageView);
             i++;
@@ -386,8 +402,6 @@ public class GameBoard {
         turnText.setFill(Color.GREENYELLOW);
         turnText.setX(bounds.getWidth()*0.5);
     }
-
-
 
 }
 

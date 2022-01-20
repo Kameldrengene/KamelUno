@@ -16,6 +16,7 @@ module com.kamelboyz.kameluno {
 
 
     opens com.kamelboyz.kameluno to javafx.fxml;
+    opens com.kamelboyz.kameluno.Model to com.google.gson;
     exports com.kamelboyz.kameluno;
     exports com.kamelboyz.kameluno.Model;
 }

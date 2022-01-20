@@ -46,7 +46,7 @@ public class MainApp extends Application {
         scene.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         RadialGradient lg1 = new RadialGradient(0, .01, bounds.getWidth() / 2, bounds.getHeight() / 2, bounds.getWidth() / 2, false, CycleMethod.NO_CYCLE, new Stop(0, Color.rgb(85, 0, 0, 1)), new Stop(1, Color.BLACK));
         scene.setFill(lg1);
-        OnEscape.exitOnEsc(scene);
+        OnEscape.exitOnEsc(scene, stage);
 
         //Setting title to the Stage
         stage.setTitle("Kamel Ludo");

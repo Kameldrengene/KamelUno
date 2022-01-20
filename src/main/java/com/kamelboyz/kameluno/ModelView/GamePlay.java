@@ -270,6 +270,7 @@ class TakeTurn implements Runnable{
                 Platform.runLater(()->{
                     gameBoard.setTurnText("Your Turn");
                     gameBoard.setPaneDisable(false);
+                    gameBoard.setEndTurnDisable(false);
                     System.out.println("board enabled for you");
                 });
             }
@@ -309,13 +310,11 @@ class PerformAction implements Runnable{
             if(response.equals("success")){
 //                gameSpace.put(playerId, "ended");
                 System.out.println("got success response");
-                Platform.runLater(()->{
-                    gameBoard.setEndTurnDisable(false);
-                });
+
             } else if (response.equals("invalid")){
                 System.out.println("invalid play, try again!");
                 Platform.runLater(()->{
-                    gameBoard.setEndTurnDisable(true);
+                    gameBoard.setEndTurnDisable(false);
                 });
             }
 

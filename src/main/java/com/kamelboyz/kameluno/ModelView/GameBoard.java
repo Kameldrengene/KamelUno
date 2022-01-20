@@ -186,6 +186,8 @@ public class GameBoard {
         BorderPane cardsBorder = new BorderPane();
         cardsBorder.setCenter(playerCardsLayout);
         onEndTurn();
+        onUnoClick();
+        onUnoForgottenClick();
         vBox.getChildren().addAll(unoPane,borderPane,cardsBorder);
         return vBox;
     }
@@ -195,8 +197,38 @@ public class GameBoard {
             @SneakyThrows
             @Override
             public void handle(ActionEvent actionEvent) {
-                gameSpace.put(Player.getInstance().getName(), "ended");
+                new Thread(()->{
+                    try {
+                        Thread.sleep(500);
+                        gameSpace.put(Player.getInstance().getName(), "ended");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
                 setPaneDisable(true);
+                setEndTurnDisable(true);
+            }
+        });
+    }
+
+    private void onUnoClick(){
+        unoBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                gameSpace.put(Player.getInstance().getName(), "UNO");
+                chatView.getChatMessages().appendText("Clicked UNO!\n");
+            }
+        });
+    }
+
+    private void onUnoForgottenClick(){
+        noUnoBtn.setOnAction(new EventHandler<ActionEvent>() {
+            @SneakyThrows
+            @Override
+            public void handle(ActionEvent actionEvent) {
+                gameSpace.put(Player.getInstance().getName(), "missingUNO");
+                chatView.getChatMessages().appendText("Clicked missing uno!\n");
             }
         });
     }

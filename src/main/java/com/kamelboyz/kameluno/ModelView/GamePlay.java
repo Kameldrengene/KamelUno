@@ -145,10 +145,10 @@ class ClientHand implements Runnable{
                 );
                 System.out.println(hand[2]+"");
                 ObjectMapper objectMapper = new ObjectMapper();
-                Gson gson = new Gson();
-//                Card[] cards = gson.fromJson(JsonParser.parseString(hand[2]+""),Card[].class);
                 Card[] cards = objectMapper.readValue(hand[2]+"",Card[].class);
-                System.out.println(cards);
+                for (int i = 0; i < cards.length; i++){
+                    System.out.println(cards[i]);
+                }
                 System.out.println("im here");
 
 

@@ -263,7 +263,28 @@ class TakeTurn implements Runnable{
 
                 System.out.println("its my turn "+ Player.getInstance().getName());
 
-                if(!status.equals("alive")) break;
+                if(!status.equals("alive")) {
+                    String winnerName = status;
+                    if(winnerName.equals(Player.getInstance().getName())){
+                        Platform.runLater(()->{
+                            try {
+                                gameBoard.setWinnerWindow();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }else {
+                        Platform.runLater(()->{
+                            try {
+                                gameBoard.setLoseWindow(winnerName);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+
+                    break;
+                }
 
                 // Take turn
                 gameSpace.put(Player.getInstance().getName(), "taken");

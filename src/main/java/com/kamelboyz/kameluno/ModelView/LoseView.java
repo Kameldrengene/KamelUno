@@ -42,6 +42,7 @@ public class LoseView {
             @Override
             public void handle(ActionEvent actionEvent) {
                 // change scene
+                System.exit(0);
             }
         });
 

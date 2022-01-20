@@ -30,13 +30,15 @@ public class GameBoard {
     private final Pane pane = new Pane();
     private Screen screen = Screen.getPrimary();
     private Rectangle2D bounds = screen.getVisualBounds();
-
+    private HBox unoBtns = new HBox();
 
     private Group playerCardsLayout = new Group();
     private Group opponent1CardsLayout = new Group();
     private Group opponent2CardsLayout = new Group();
     private Group opponent3CardsLayout = new Group();
     private Group deck = new Group();
+    private VBox middlelayout = new VBox(50);
+    private BorderPane midBorder = new BorderPane();
     private StackPane pile = new StackPane();
     private Text turnText = new Text();
     private ArrayList<Pane> panes = new ArrayList<>();
@@ -115,16 +117,15 @@ public class GameBoard {
     }
 
     public BorderPane createMiddleBox() throws IOException {
-        BorderPane midBox = new BorderPane();
-        midBox.setPrefWidth(bounds.getWidth() * 0.6);
+        midBorder.setPrefWidth(bounds.getWidth() * 0.6);
 
         // create bottom layout of cards
-        VBox vBoxPlayer = initPlayerCardsLayout(midBox);
-        midBox.setBottom(vBoxPlayer);
+        VBox vBoxPlayer = initPlayerCardsLayout(midBorder);
+        midBorder.setBottom(vBoxPlayer);
 
         // create top layout of cards
         VBox vBoxOpponent2 = initOpponent2CardsLayout();
-        midBox.setTop(vBoxOpponent2);
+        midBorder.setTop(vBoxOpponent2);
 
         // create middle layout of deck and pile
         HBox hBox = new HBox(30);
@@ -144,14 +145,14 @@ public class GameBoard {
         hBox.getChildren().addAll(pile,deck);
         hBox.setAlignment(Pos.CENTER);
 
-        VBox vBox = new VBox(40);
-        vBox.getChildren().addAll(hBox,turnText);
-        vBox.setAlignment(Pos.CENTER);
 
-        midBox.setCenter(vBox);
+        middlelayout.getChildren().addAll(hBox,turnText);
+        middlelayout.setAlignment(Pos.CENTER);
+
+        midBorder.setCenter(middlelayout);
 
 
-        return midBox;
+        return midBorder;
     }
 
     public BorderPane createRightBox() throws IOException {
@@ -176,7 +177,6 @@ public class GameBoard {
         BorderPane borderPane = new BorderPane();
         BorderPane unoPane = new BorderPane();
         borderPane.setCenter(name);
-        HBox unoBtns = new HBox();
         unoBtns.getChildren().add(unoBtn);
         unoBtns.getChildren().add(noUnoBtn);
         unoBtns.getChildren().add(endTurnBtn);
@@ -443,6 +443,29 @@ public class GameBoard {
         }
     }
 
+    public void setWinnerWindow() throws IOException {
+        WinView winView = new WinView(bounds.getWidth(),bounds.getHeight());
+        VBox vBox = winView.getVBox();
+        midBorder.getChildren().remove(middlelayout);
+        midBorder.setCenter(vBox);
+        playerCardsLayout.getChildren().clear();
+        opponent1CardsLayout.getChildren().clear();
+        opponent2CardsLayout.getChildren().clear();
+        opponent3CardsLayout.getChildren().clear();
+        unoBtns.getChildren().clear();
+    }
+
+    public void setLoseWindow(String winnerName) throws IOException {
+        LoseView loseView = new LoseView(winnerName,bounds.getWidth(),bounds.getHeight());
+        VBox vBox = loseView.getVBox();
+        midBorder.getChildren().remove(middlelayout);
+        midBorder.setCenter(vBox);
+        playerCardsLayout.getChildren().clear();
+        opponent1CardsLayout.getChildren().clear();
+        opponent2CardsLayout.getChildren().clear();
+        opponent3CardsLayout.getChildren().clear();
+        unoBtns.getChildren().clear();
+    }
     public void setTurnText(String playerName){
         turnText.setText(playerName);
         //Setting font to the text

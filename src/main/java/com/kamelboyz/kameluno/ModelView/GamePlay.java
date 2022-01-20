@@ -58,9 +58,11 @@ public class GamePlay {
         gameBoard = new GameBoard(opponents,lobbyId, chatView,gameSpace,lastPlayed);
         gameBoard.setPaneDisable(true);
         new Thread(new ClientHand(Player.getInstance().getName(),playerCards,gameSpace,gameBoard)).start();
-        new Thread(new TakeTurn(gameSpace,gameBoard)).start();
+        new Thread(new TakeTurn(gameSpace,gameBoard,gameDone)).start();
         new Thread(new TurnWatcher(Player.getInstance().getName(),gameSpace,gameBoard)).start();
         new Thread(new BoardUpdater(gameDone,gameSpace,Player.getInstance().getName(),gameBoard)).start();
+        new Thread(new CheckUNO(Player.getInstance().getName(),gameSpace,gameDone,chatView)).start();
+        new Thread(new CheckMissingUNO(Player.getInstance().getName(), gameSpace,gameDone,chatView)).start();
 
 
         TimeUnit.SECONDS.sleep(1);
@@ -246,9 +248,11 @@ class TurnWatcher implements Runnable{
 class TakeTurn implements Runnable{
     RemoteSpace gameSpace;
     GameBoard gameBoard;
-    public TakeTurn(RemoteSpace gameSpace,GameBoard gameBoard){
+    boolean gameDone;
+    public TakeTurn(RemoteSpace gameSpace,GameBoard gameBoard,boolean gameDone){
       this.gameSpace = gameSpace;
       this.gameBoard = gameBoard;
+      this.gameDone = gameDone;
     }
     @Override
     public void run() {
@@ -264,6 +268,7 @@ class TakeTurn implements Runnable{
                 System.out.println("its my turn "+ Player.getInstance().getName());
 
                 if(!status.equals("alive")) {
+                    gameDone = true;
                     String winnerName = status;
                     if(winnerName.equals(Player.getInstance().getName())){
                         Platform.runLater(()->{
@@ -409,6 +414,78 @@ class BoardUpdater implements Runnable{
         } catch (JsonParseException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class CheckUNO implements Runnable{
+
+    String playerId;
+    RemoteSpace gameSpace;
+    boolean gameDone;
+    ChatView chatView;
+
+    public CheckUNO(String playerId, RemoteSpace gameSpace,boolean gameDone,ChatView chatView) {
+        this.playerId = playerId;
+        this.gameSpace = gameSpace;
+        this.chatView = chatView;
+        this.gameDone = gameDone;
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (!gameDone) {
+
+                // Wait for signal
+                String caller = (String) gameSpace.get(
+                        new ActualField(playerId),
+                        new ActualField("UNO"),
+                        new FormalField(String.class)
+                )[2];
+
+                chatView.getChatMessages().appendText(caller + ": UNO!\n");
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class CheckMissingUNO implements Runnable{
+
+    String playerId;
+    RemoteSpace gameSpace;
+    boolean gameDone;
+    ChatView chatView;
+
+    public CheckMissingUNO(String playerId, RemoteSpace gameSpace,boolean gameDone,ChatView chatView) {
+        this.playerId = playerId;
+        this.gameSpace = gameSpace;
+        this.gameDone = gameDone;
+        this.chatView = chatView;
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (!gameDone) {
+
+                // Wait for signal
+                Object[] msg = gameSpace.get(
+                        new ActualField(playerId),
+                        new ActualField("UNO"),
+                        new FormalField(String.class),
+                        new FormalField(String.class)
+                );
+
+                String receiver = (String) msg[2];
+                String caller = (String) msg[3];
+
+                chatView.getChatMessages().appendText(caller + " called missing UNO on " + receiver);
+            }
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

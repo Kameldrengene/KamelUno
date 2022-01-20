@@ -338,11 +338,9 @@ class PerformAction implements Runnable{
 //                gameSpace.put(playerId, "ended");
                 System.out.println("got success response");
 
+
             } else if (response.equals("invalid")){
                 System.out.println("invalid play, try again!");
-                Platform.runLater(()->{
-                    gameBoard.setEndTurnDisable(false);
-                });
             }
 
             break action;
@@ -444,8 +442,10 @@ class CheckUNO implements Runnable{
                         new ActualField("UNO"),
                         new FormalField(String.class)
                 )[2];
-
-                chatView.getChatMessages().appendText(caller + ": UNO!\n");
+                Platform.setImplicitExit(false);
+                Platform.runLater(()->{
+                    chatView.getChatMessages().appendText(caller + ": UNO!\n");
+                });
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -482,8 +482,10 @@ class CheckMissingUNO implements Runnable{
 
                 String receiver = (String) msg[2];
                 String caller = (String) msg[3];
-
-                chatView.getChatMessages().appendText(caller + " called missing UNO on " + receiver);
+                Platform.setImplicitExit(false);
+                Platform.runLater(()->{
+                    chatView.getChatMessages().appendText(caller + " called missing UNO on " + receiver +"\n");
+                });
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

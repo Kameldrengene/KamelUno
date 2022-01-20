@@ -217,7 +217,6 @@ public class GameBoard {
             @Override
             public void handle(ActionEvent actionEvent) {
                 gameSpace.put(Player.getInstance().getName(), "UNO");
-                chatView.getChatMessages().appendText("Clicked UNO!\n");
             }
         });
     }
@@ -228,7 +227,6 @@ public class GameBoard {
             @Override
             public void handle(ActionEvent actionEvent) {
                 gameSpace.put(Player.getInstance().getName(), "missingUNO");
-                chatView.getChatMessages().appendText("Clicked missing uno!\n");
             }
         });
     }

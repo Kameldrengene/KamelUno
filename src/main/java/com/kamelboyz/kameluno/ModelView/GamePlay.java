@@ -10,6 +10,7 @@ import com.kamelboyz.kameluno.Model.Chat;
 import com.kamelboyz.kameluno.Model.Opponent;
 import com.kamelboyz.kameluno.Model.Player;
 import com.kamelboyz.kameluno.Settings.Settings;
+import javafx.application.Platform;
 import lombok.Data;
 import com.google.gson.Gson;
 import lombok.Getter;
@@ -17,10 +18,7 @@ import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 public class GamePlay {
@@ -123,21 +121,6 @@ class ClientHand implements Runnable{
         try {
             while (true) {
                 System.out.println("before here");
-
-                // Wait for signal
-                /*String hand = (String) gameSpace.get(
-                        new ActualField(Player.getInstance().getName()),
-                        new ActualField("cards"),
-                        new FormalField(String.class)
-                )[2];
-
-                System.out.println(hand);
-                String hand1 = "{"+hand+"}";
-                JSONObject root = new JSONObject(hand1);
-                System.out.println(root.getJSONObject("0").getString("color"));*/
-
-
-
                 Object[] hand = gameSpace.get(
                         new ActualField(playerId),
                         new ActualField("cards"),
@@ -145,27 +128,18 @@ class ClientHand implements Runnable{
                 );
                 System.out.println(hand[2]+"");
                 ObjectMapper objectMapper = new ObjectMapper();
-                Gson gson = new Gson();
-//                Card[] cards = gson.fromJson(JsonParser.parseString(hand[2]+""),Card[].class);
                 Card[] cards = objectMapper.readValue(hand[2]+"",Card[].class);
-                System.out.println(cards);
+                playerCards = Arrays.asList(cards);
+                Platform.runLater(()->{
+                    try {
+                        gameBoard.updatePlayerCards(playerCards);
+                        System.out.println("cards updated");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
                 System.out.println("im here");
-
-
-                /*System.out.println((String) hand);
-                ObjectMapper mapper = new ObjectMapper();
-                ArrayList<Object> objects = mapper.readValue((String) hand, ArrayList.class);
-                for (int i = 0; i < objects.size(); i++) {
-                    System.out.println(objects.get(i));
-                }*/
-
-
-
-                //System.out.println(Arrays.toString(hand));
-                // GUI
-//                playerCards.addAll(Arrays.asList(hand));
-//                gameBoard.updatePlayerCards(playerCards);
-
 
             }
         } catch (InterruptedException e) {

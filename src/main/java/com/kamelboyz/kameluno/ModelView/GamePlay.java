@@ -287,7 +287,8 @@ class TakeTurn implements Runnable{
                 }
 
                 // Take turn
-                gameSpace.put(Player.getInstance().getName(), "taken");
+                gameSpace.put(Player.getInstance().getName(), "taken","!");
+                System.out.println(Player.getInstance().getName()+" has taken turn ");
                 Platform.runLater(()->{
                     gameBoard.setTurnText("Your Turn");
                     gameBoard.setPaneDisable(false);

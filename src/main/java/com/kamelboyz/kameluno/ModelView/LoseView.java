@@ -37,7 +37,7 @@ public class LoseView {
         name.setFill(Color.DEEPSKYBLUE);
         name.setX(width*0.5);
 
-        Button afslut = BootstrapButton.makeBootstrapButton("afslut","btn-success");
+        Button afslut = BootstrapButton.makeBootstrapButton("Exit","btn-success");
         afslut.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent actionEvent) {
